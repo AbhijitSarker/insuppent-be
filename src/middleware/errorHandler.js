@@ -1,4 +1,5 @@
 import { STATUS_CODES } from '../utils/constants.js';
+import config from '../config/config.js';
 
 const handleCastErrorDB = err => ({
     message: `Invalid ${err.path}: ${err.value}`,
@@ -37,7 +38,7 @@ const errorHandler = (err, req, res, next) => {
     }
 
     // Programming or other unknown error: don't leak error details
-    if (process.env.NODE_ENV === 'development') {
+    if (config.app.env === 'development') {
         return res.status(err.statusCode).json({
             status: 'error',
             error: err,

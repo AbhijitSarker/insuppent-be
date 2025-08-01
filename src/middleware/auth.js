@@ -2,6 +2,7 @@ import jwt from 'jsonwebtoken';
 import { AppError } from '../utils/helpers.js';
 import User from '../models/User.js';
 import { STATUS_CODES } from '../utils/constants.js';
+import config from '../config/config.js';
 
 export const protect = async (req, res, next) => {
     try {
@@ -16,7 +17,7 @@ export const protect = async (req, res, next) => {
         }
 
         // 2) Verify token
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const decoded = jwt.verify(token, config.jwt.secret);
 
         // 3) Check if user still exists
         const user = await User.findById(decoded.id);

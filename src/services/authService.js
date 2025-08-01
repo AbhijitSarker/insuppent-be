@@ -1,10 +1,10 @@
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
-import { JWT_EXPIRES_IN } from '../utils/constants.js';
+import config from '../config/config.js';
 
 const generateToken = (id) => {
-    return jwt.sign({ id }, process.env.JWT_SECRET, {
-        expiresIn: JWT_EXPIRES_IN
+    return jwt.sign({ id }, config.jwt.secret, {
+        expiresIn: config.jwt.expiresIn
     });
 };
 

@@ -1,11 +1,10 @@
 import mongoose from 'mongoose';
+import config from './config.js';
 
 const connectDB = async () => {
     try {
-        const conn = await mongoose.connect(process.env.MONGODB_URI, {
-            // useNewUrlParser: true,
-            // useUnifiedTopology: true,
-            dbName: process.env.DB_NAME,
+        const conn = await mongoose.connect(config.db.uri, {
+            dbName: config.db.name
         });
         console.log(`MongoDB Connected: ${conn.connection.host}`);
     } catch (error) {

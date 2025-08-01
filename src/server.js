@@ -1,12 +1,11 @@
 import 'dotenv/config';
 import app from './app.js';
 import connectDB from './config/database.js';
+import config from './config/config.js';
 
 // Connect to MongoDB
 connectDB();
 
-const PORT = process.env.PORT || 5000;
-
-app.listen(PORT, () => {
-    console.log(`Server is running in ${process.env.NODE_ENV} mode on port ${PORT}`);
+app.listen(config.app.port, () => {
+    console.log(`Server is running in ${config.app.env} mode on port ${config.app.port}`);
 });
