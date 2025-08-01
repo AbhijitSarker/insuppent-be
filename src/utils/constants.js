@@ -1,0 +1,17 @@
+export const STATUS_CODES = {
+    OK: 200,
+    CREATED: 201,
+    BAD_REQUEST: 400,
+    UNAUTHORIZED: 401,
+    FORBIDDEN: 403,
+    NOT_FOUND: 404,
+    INTERNAL_SERVER: 500
+};
+
+export const ROLES = {
+    USER: 'user',
+    ADMIN: 'admin'
+};
+
+export const JWT_EXPIRES_IN = '30d';
+export const PASSWORD_MIN_LENGTH = 6;
