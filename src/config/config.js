@@ -7,7 +7,7 @@ const config = {
     },
     db: {
         uri: process.env.MONGODB_URI,
-        name: process.env.DB_NAME || 'insuppent-dev'
+        name: process.env.DB_NAME || 'insuppent'
     },
     jwt: {
         secret: process.env.JWT_SECRET,
