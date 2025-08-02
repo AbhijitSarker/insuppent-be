@@ -22,7 +22,6 @@ const limiter = rateLimit({
 });
 app.use('/api', limiter);
 
-app.use("/", (req, res) => res.send("Hello World !!"));
 // API Routes
 app.use('/api/v1', routes);
 
