@@ -13,4 +13,9 @@ router.get(
   LeadController.getAllLeads,
 );
 
+router.get(
+  '/public',
+  LeadController.findLeads,
+);
+
 export const LeadRoutes = router;

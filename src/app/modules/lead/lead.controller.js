@@ -37,8 +37,26 @@ const getAllLeads = catchAsync(async (req, res) => {
   });
 });
 
+const findLeads = catchAsync(async (req, res) => {
+  const filters = pick(req.query, leadFilterableFields);
+  const paginationOptions = pick(req.query, paginationFields);
+
+  const result = await LeadService.findLeads(
+    filters,
+    paginationOptions,
+  );
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: LEAD_MESSAGES.FETCH_ALL_SUCCESS,
+    meta: result.meta,
+    data: result.data,
+  });
+});
 
 export const LeadController = {
   webhookHandler,
-  getAllLeads
+  getAllLeads,
+  findLeads
 };

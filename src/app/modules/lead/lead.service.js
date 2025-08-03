@@ -82,7 +82,68 @@ const getAllLeads = async (filters, paginationOptions) => {
     data: result,
   };
 };
+
+const findLeads = async (filters, paginationOptions) => {
+  const { limit, page, skip, sortBy, sortOrder } =
+    paginationHelpers.calculatePagination(paginationOptions);
+
+  const { searchTerm, ...filtersData } = filters;
+  const andConditions = [{ status: 'public' }]; // Only get public leads
+
+  if (searchTerm) {
+    andConditions.push({
+      $or: leadSearchableFields.map(field => ({
+        [field]: {
+          $regex: searchTerm,
+          $options: 'i',
+        },
+      })),
+    });
+  }
+
+  if (Object.keys(filtersData).length) {
+    andConditions.push({
+      $and: Object.entries(filtersData).map(([field, value]) => ({
+        [field]: value,
+      })),
+    });
+  }
+
+  const sortConditions = {};
+  if (sortBy && sortOrder) {
+    sortConditions[sortBy] = sortOrder === 'asc' ? 1 : -1;
+  }
+
+  const whereConditions = { $and: andConditions };
+
+  const result = await Lead.find(whereConditions)
+    .sort(sortConditions)
+    .skip(skip)
+    .limit(limit)
+    .select('-__v')
+    .lean();
+
+  // Mask sensitive information
+  const maskedResult = result.map(lead => ({
+    ...lead,
+    email: lead.email.replace(/(.{2})(.*)(@.*)/, '$1***$3'),
+    phone: lead.phone.replace(/(\d{3})(\d+)(\d{2})/, '$1****$3'),
+  }));
+
+  const total = await Lead.countDocuments(whereConditions);
+
+  return {
+    meta: {
+      page,
+      limit,
+      total,
+    },
+    data: maskedResult,
+  };
+};
+
 export const LeadService = {
   processWebhookData,
-  getAllLeads
+  getAllLeads,
+  findLeads
 };
