@@ -1,3 +1,3 @@
-export const leadFilterableFields = ['status', 'type'];
+export const leadFilterableFields = ['searchTerm', 'status', 'type'];
 
-export const leadSearchableFields = ['title', 'email', 'phone', 'state', ];
+export const leadSearchableFields = ['name', 'email', 'phone', 'state', ];

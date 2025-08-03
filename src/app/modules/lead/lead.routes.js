@@ -8,5 +8,9 @@ router.post(
   LeadController.webhookHandler,
 );
 
+router.get(
+  '/',
+  LeadController.getAllLeads,
+);
 
 export const LeadRoutes = router;
