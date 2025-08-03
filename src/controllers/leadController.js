@@ -5,7 +5,7 @@ export const webhookHandler = asyncHandler(async (req, res) => {
     console.log("req.body",req.body);
     
     const lead = await leadService.processWebhookData(req.body);
-    res.status(201).json({
+    res.status(200).json({
         status: 'success',
         data: lead
     });
