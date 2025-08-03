@@ -21,7 +21,11 @@ const leadSchema = new Schema({
   },
   zipCode: {
     type: String,
-    required: true
+    trim: true,
+  },
+  state: {
+    type: String,
+    trim: true,
   },
   type: {
     type: String,
@@ -32,10 +36,6 @@ const leadSchema = new Schema({
     enum: ['public', 'private'],
     default: 'public'
   },
-  state: {
-    type: String,
-    default: ''
-  },
   saleCount: {
     type: Number,
     default: 0
@@ -45,7 +45,10 @@ const leadSchema = new Schema({
     default: 3
   },
 }, {
-  timestamps: true
+  timestamps: true,
+  toJSON: {
+    virtuals: true,
+  },
 });
 
 export const Lead = model('Lead', leadSchema);

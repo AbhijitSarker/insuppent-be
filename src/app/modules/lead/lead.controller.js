@@ -2,7 +2,7 @@ import httpStatus from 'http-status';
 import catchAsync from '../../../shared/catchAsync.js';
 import sendResponse from '../../../shared/sendResponse.js';
 import { LeadService } from './lead.service.js';
-import { leadSearchableFields } from './lead.constants.js';
+import { leadFilterableFields, leadSearchableFields } from './lead.constants.js';
 import { paginationFields } from '../../../constants/pagination.js';
 import pick from '../../../shared/pick.js';
 import { LEAD_MESSAGES } from '../../../enums/messages.js';
@@ -20,7 +20,7 @@ const webhookHandler = catchAsync(async (req, res) => {
 });
 
 const getAllLeads = catchAsync(async (req, res) => {
-  const filters = pick(req.query, leadSearchableFields);
+  const filters = pick(req.query, leadFilterableFields);
   const paginationOptions = pick(req.query, paginationFields);
 
   const result = await LeadService.getAllLeads(

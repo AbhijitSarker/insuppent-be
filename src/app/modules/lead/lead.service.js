@@ -1,9 +1,16 @@
 import { parsePayload } from '../../../helpers/parsePayload.js';
 import { Lead } from './lead.model.js';
 import { paginationHelpers } from '../../../helpers/paginationHelper.js';
+import { leadSearchableFields } from './lead.constants.js';
+import { getStateFromZipCode } from '../../../helpers/zipCodeHelper.js';
 
 const processWebhookData = async (payload) => {
   const body = parsePayload(payload);
+
+  //TODO: Uncomment when zip code processing is needed
+  // //find state from zip code
+  // const zipCode = body['Zip Code']?.trim();
+  // const state = getStateFromZipCode(zipCode);
 
   const leadData = {
     zipCode: body['Zip Code']?.trim(),
@@ -11,12 +18,18 @@ const processWebhookData = async (payload) => {
     email: body['Email']?.toLowerCase().trim(),
     phone: body['Phone']?.replace(/\D/g, ''), // Remove non-numeric characters
     address: (body['Street Address'] || body['Full Street Address'])?.trim(),
-    type: body['form_name']?.trim(),
+    //assign lead type based on form name
+    type: (() => {
+      const formName = body['form_name']?.toLowerCase().trim();
+      if (formName?.includes('auto')) return 'auto';
+      if (formName?.includes('home')) return 'home';
+      if (formName?.includes('mortgage')) return 'mortgage';
+      return 'other';
+    })(),
   };
 
-  const lead = await Lead.create(leadData);
+  return await Lead.create(leadData);
 
-  return lead;
 };
 
 const getAllLeads = async (filters, paginationOptions) => {
@@ -47,11 +60,11 @@ const getAllLeads = async (filters, paginationOptions) => {
 
   const sortConditions = {};
   if (sortBy && sortOrder) {
-    sortConditions[sortBy] = sortOrder;
+    sortConditions[sortBy] = sortOrder === 'asc' ? 1 : -1;
   }
 
   const whereConditions =
-    andConditions.length > 0 ? { $and: andConditions } : {};
+  andConditions.length > 0 ? { $and: andConditions } : {};
 
   const result = await Lead.find(whereConditions)
     .sort(sortConditions)
