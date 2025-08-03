@@ -27,10 +27,6 @@ const leadSchema = new Schema({
     type: String,
     required: true
   },
-  dateAdded: {
-    type: Date,
-    required: true
-  },
   type: {
     type: String,
     required: true,
