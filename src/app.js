@@ -1,42 +1,42 @@
-import express from 'express';
 import cors from 'cors';
-import helmet from 'helmet';
-import morgan from 'morgan';
-import rateLimit from 'express-rate-limit';
-import routes from './routes/index.js';
-import errorHandler from './middleware/errorHandler.js';
+import express from 'express';
+import httpStatus from 'http-status';
+import globalErrorHandler from './app/middlewares/globalErrorHandler.js';
+import routes from './app/routes/index.js';
+import cookieParser from 'cookie-parser';
 
 const app = express();
 
-// Security Middleware
-app.use(helmet());
 app.use(cors());
-app.use(express.json({ limit: '10kb' }));
+app.use(cookieParser());
+
+// Body parsers
+app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(morgan('dev'));
 
-// Rate limiting
-const limiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100, // limit each IP to 100 requests per windowMs
-    validate: {
-        xForwardedForHeader: false, // Disable this validation
-    },
-});
-app.use('/api', limiter);
-
-// API Routes
 app.use('/api/v1', routes);
 
-// 404 handler
-app.use((req, res) => {
-    res.status(404).json({
-        status: 'error',
-        message: 'Route not found'
-    });
+//Testing
+app.get('/', async (req, res, next) => {
+  res.send('Hello World');
 });
 
-// Global error handler
-app.use(errorHandler);
+//global error handler
+app.use(globalErrorHandler);
+
+//handle not found
+app.use((req, res, next) => {
+  res.status(httpStatus.NOT_FOUND).json({
+    success: false,
+    message: 'Not Found',
+    errorMessages: [
+      {
+        path: req.originalUrl,
+        message: 'API Endpoint Not Found',
+      },
+    ],
+  });
+  next();
+});
 
 export default app;
