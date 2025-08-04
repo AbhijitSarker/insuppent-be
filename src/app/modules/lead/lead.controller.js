@@ -55,8 +55,37 @@ const findLeads = catchAsync(async (req, res) => {
   });
 });
 
+const updateLead = catchAsync(async (req, res) => {
+  const id = req.params.id;
+  const updatedData = req.body;
+  
+  const result = await LeadService.updateLead(id, updatedData);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: LEAD_MESSAGES.UPDATE_SUCCESS,
+    data: result,
+  });
+});
+
+const deleteLead = catchAsync(async (req, res) => {
+  const id = req.params.id;
+  
+  const result = await LeadService.deleteLead(id);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: LEAD_MESSAGES.DELETE_SUCCESS,
+    data: result,
+  });
+});
+
 export const LeadController = {
   webhookHandler,
   getAllLeads,
-  findLeads
+  findLeads,
+  updateLead,
+  deleteLead
 };

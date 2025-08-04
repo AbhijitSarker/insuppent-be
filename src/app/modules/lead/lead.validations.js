@@ -1,24 +1,20 @@
 import { z } from 'zod';
 
-const createAcademicDepartmentZodSchema = z.object({
+const updateLeadZodSchema = z.object({
   body: z.object({
-    title: z.string({
-      required_error: 'Academic title is required',
-    }),
-    academicFaculty: z.string({
-      required_error: 'Academic department is required',
-    }),
+    name: z.string().optional(),
+    email: z.string().email().optional(),
+    phone: z.string().optional(),
+    address: z.string().optional(),
+    zipCode: z.string().optional(),
+    state: z.string().optional(),
+    type: z.enum(['auto', 'home', 'mortgage', 'other']).optional(),
+    status: z.enum(['public', 'private']).optional(),
+    saleCount: z.number().int().min(0).optional(),
+    maxLeadSaleCount: z.number().int().min(1).optional(),
   }),
 });
 
-const updateAcademicDepartmentZodSchema = z.object({
-  body: z.object({
-    title: z.string().optional(),
-    academicFaculty: z.string().optional(),
-  }),
-});
-
-export const AcademicDepartmentValidation = {
-  createAcademicDepartmentZodSchema,
-  updateAcademicDepartmentZodSchema,
+export const LeadValidation = {
+  updateLeadZodSchema,
 };

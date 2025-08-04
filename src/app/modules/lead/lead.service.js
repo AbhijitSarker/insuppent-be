@@ -3,6 +3,9 @@ import { Lead } from './lead.model.js';
 import { paginationHelpers } from '../../../helpers/paginationHelper.js';
 import { leadSearchableFields } from './lead.constants.js';
 import { getStateFromZipCode } from '../../../helpers/zipCodeHelper.js';
+import { LEAD_MESSAGES } from '../../../enums/messages.js';
+import ApiError from '../../../errors/ApiError.js';
+import httpStatus from 'http-status';
 
 const processWebhookData = async (payload) => {
   const body = parsePayload(payload);
@@ -142,8 +145,36 @@ const findLeads = async (filters, paginationOptions) => {
   };
 };
 
+
+const updateLead = async (id, payload) => {
+  const result = await Lead.findOneAndUpdate(
+    { _id: id },
+    payload,
+    {
+      new: true,
+    },
+  )
+
+  if (!result) {
+    throw new ApiError(httpStatus.NOT_FOUND, LEAD_MESSAGES.NOT_FOUND);
+  }
+
+  return result;
+};
+
+const deleteLead = async (id) => {
+  const result = await Lead.findByIdAndDelete(id);
+
+  if (!result) {
+    throw new ApiError(httpStatus.NOT_FOUND, LEAD_MESSAGES.NOT_FOUND);
+  }
+  return result;
+};
+
 export const LeadService = {
   processWebhookData,
   getAllLeads,
-  findLeads
+  findLeads,
+  updateLead,
+  deleteLead,
 };
