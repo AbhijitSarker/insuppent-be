@@ -11,6 +11,11 @@ router.post(
 );
 
 router.get(
+  '/:id',
+  LeadController.getSingleLead,
+);
+
+router.get(
   '/',
   LeadController.getAllLeads,
 );

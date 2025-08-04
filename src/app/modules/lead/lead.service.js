@@ -35,6 +35,16 @@ const processWebhookData = async (payload) => {
 
 };
 
+const getSingleLead = async (id) => {
+  const result = await Lead.findById(id).lean();
+
+  if (!result) {
+    throw new ApiError(httpStatus.NOT_FOUND, LEAD_MESSAGES.NOT_FOUND);
+  }
+
+  return result;
+};
+
 const getAllLeads = async (filters, paginationOptions) => {
   const { limit, page, skip, sortBy, sortOrder } =
     paginationHelpers.calculatePagination(paginationOptions);
@@ -173,6 +183,7 @@ const deleteLead = async (id) => {
 
 export const LeadService = {
   processWebhookData,
+  getSingleLead,
   getAllLeads,
   findLeads,
   updateLead,

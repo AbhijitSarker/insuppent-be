@@ -19,6 +19,18 @@ const webhookHandler = catchAsync(async (req, res) => {
   });
 });
 
+const getSingleLead = catchAsync(async (req, res) => {
+  const { id } = req.params;
+  const result = await LeadService.getSingleLead(id);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: LEAD_MESSAGES.FETCH_SINGLE_SUCCESS,
+    data: result,
+  });
+});
+
 const getAllLeads = catchAsync(async (req, res) => {
   const filters = pick(req.query, leadFilterableFields);
   const paginationOptions = pick(req.query, paginationFields);
@@ -84,6 +96,7 @@ const deleteLead = catchAsync(async (req, res) => {
 
 export const LeadController = {
   webhookHandler,
+  getSingleLead,
   getAllLeads,
   findLeads,
   updateLead,
