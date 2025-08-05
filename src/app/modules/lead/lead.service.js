@@ -52,6 +52,7 @@ const getAllLeads = async (filters, paginationOptions) => {
   const { searchTerm, ...filtersData } = filters;
   const andConditions = [];
 
+  // Handle search term
   if (searchTerm) {
     andConditions.push({
       $or: leadSearchableFields.map(field => ({
@@ -63,13 +64,22 @@ const getAllLeads = async (filters, paginationOptions) => {
     });
   }
 
-  if (Object.keys(filtersData).length) {
-    andConditions.push({
-      $and: Object.entries(filtersData).map(([field, value]) => ({
-        [field]: value,
-      })),
-    });
-  }
+  // Handle filters
+  Object.entries(filtersData).forEach(([field, value]) => {
+    if (!value || value === '__ALL__') return;
+
+    if (value.includes(',')) {
+      const values = value.split(',').filter(v => v !== '__ALL__');
+      if (values.length > 0) {
+        // Use $or for multiple values of the same field
+        andConditions.push({
+          $or: values.map(v => ({ [field]: v }))
+        });
+      }
+    } else {
+      andConditions.push({ [field]: value });
+    }
+  });
 
   const sortConditions = {};
   if (sortBy && sortOrder) {
@@ -77,7 +87,7 @@ const getAllLeads = async (filters, paginationOptions) => {
   }
 
   const whereConditions =
-  andConditions.length > 0 ? { $and: andConditions } : {};
+    andConditions.length > 0 ? { $and: andConditions } : {};
 
   const result = await Lead.find(whereConditions)
     .sort(sortConditions)
@@ -103,6 +113,7 @@ const findLeads = async (filters, paginationOptions) => {
   const { searchTerm, ...filtersData } = filters;
   const andConditions = [{ status: 'public' }]; // Only get public leads
 
+  // Handle search term
   if (searchTerm) {
     andConditions.push({
       $or: leadSearchableFields.map(field => ({
@@ -114,13 +125,22 @@ const findLeads = async (filters, paginationOptions) => {
     });
   }
 
-  if (Object.keys(filtersData).length) {
-    andConditions.push({
-      $and: Object.entries(filtersData).map(([field, value]) => ({
-        [field]: value,
-      })),
-    });
-  }
+  // Handle filters
+  Object.entries(filtersData).forEach(([field, value]) => {
+    if (!value || value === '__ALL__') return;
+
+    if (value.includes(',')) {
+      const values = value.split(',').filter(v => v !== '__ALL__');
+      if (values.length > 0) {
+        // Use $or for multiple values of the same field
+        andConditions.push({
+          $or: values.map(v => ({ [field]: v }))
+        });
+      }
+    } else {
+      andConditions.push({ [field]: value });
+    }
+  });
 
   const sortConditions = {};
   if (sortBy && sortOrder) {
