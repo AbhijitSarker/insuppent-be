@@ -17,6 +17,7 @@ const processWebhookData = async (payload) => {
 
   const leadData = {
     zipCode: body['Zip Code']?.trim(),
+    state: body['State']?.trim(),
     name: `${body['First Name']?.trim()} ${body['Last Name']?.trim()}`.trim(),
     email: body['Email']?.toLowerCase().trim(),
     phone: body['Phone']?.replace(/\D/g, ''), // Remove non-numeric characters
