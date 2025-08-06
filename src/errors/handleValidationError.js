@@ -1,3 +1,5 @@
+import httpStatus from 'http-status';
+
 const handleValidationError = (error) => {
   const errors = Object.values(error.errors).map((el) => {
     return {
@@ -6,10 +8,8 @@ const handleValidationError = (error) => {
     };
   });
 
-  const statusCode = 400;
-  
   return {
-    statusCode,
+    statusCode: httpStatus.BAD_REQUEST,
     message: 'Validation Error',
     errorMessages: errors,
   };

@@ -1,16 +1,16 @@
 import mongoose from 'mongoose';
+import httpStatus from 'http-status';
 
 const handleCastError = (error) => {
   const errors = [
     {
       path: error.path,
-      message: 'Invalid Id',
+      message: 'Invalid ID',
     },
   ];
 
-  const statusCode = 400;
   return {
-    statusCode,
+    statusCode: httpStatus.BAD_REQUEST,
     message: 'Cast Error',
     errorMessages: errors,
   };

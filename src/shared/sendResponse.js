@@ -9,8 +9,8 @@ const sendResponse = (res, data) => {
     statusCode: data.statusCode,
     success: data.success,
     message: data.message || null,
-    meta: data.meta || null || undefined,
-    data: data.data || null || undefined,
+    meta: data.meta || null,
+    data: data.data || null,
   };
 
   // Send the response with the specified status code and JSON data
