@@ -94,11 +94,26 @@ const deleteLead = catchAsync(async (req, res) => {
   });
 });
 
+const updateStatus = catchAsync(async (req, res) => {
+  const { id } = req.params;
+  const { status } = req.body;
+  
+  const result = await LeadService.updateStatus(id, status);
+  
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Lead status updated successfully',
+    data: result,
+  });
+});
+
 export const LeadController = {
   webhookHandler,
   getSingleLead,
   getAllLeads,
   findLeads,
   updateLead,
-  deleteLead
+  deleteLead,
+  updateStatus,
 };

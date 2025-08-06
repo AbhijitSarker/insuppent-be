@@ -202,6 +202,20 @@ const deleteLead = async (id) => {
   return result;
 };
 
+const updateStatus = async (id, status) => {
+  const result = await Lead.findByIdAndUpdate(
+    id,
+    { status },
+    { new: true }
+  );
+
+  if (!result) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'Lead not found');
+  }
+
+  return result;
+};
+
 export const LeadService = {
   processWebhookData,
   getSingleLead,
@@ -209,4 +223,5 @@ export const LeadService = {
   findLeads,
   updateLead,
   deleteLead,
+  updateStatus,
 };
