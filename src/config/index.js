@@ -13,7 +13,7 @@ export default {
   bcrypt_salt_rounds: process.env.BCRYPT_SALT_ROUNDS || 12,
   jwt: {
     secret: process.env.JWT_SECRET || 'your-secret-key',
-    expires_in: process.env.JWT_EXPIRES_IN || '1d',
+    expires_in: process.env.JWT_EXPIRES_IN || '7d',
     refresh_secret: process.env.JWT_REFRESH_SECRET || 'your-refresh-secret',
     refresh_expires_in: process.env.JWT_REFRESH_EXPIRES_IN || '7d',
   },

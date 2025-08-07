@@ -69,16 +69,24 @@ const getAllLeads = async (filters, paginationOptions) => {
   Object.entries(filtersData).forEach(([field, value]) => {
     if (!value || value === '__ALL__') return;
 
+    // Normalize state filter
+    if (field === 'state') {
+      value = value.toUpperCase().trim();
+      console.log('State filter value (getAllLeads):', value);
+    }
+
     if (value.includes(',')) {
-      const values = value.split(',').filter(v => v !== '__ALL__');
+      const values = value.split(',').map(v => v.trim().toUpperCase()).filter(v => v !== '__ALL__');
       if (values.length > 0) {
         // Use $or for multiple values of the same field
         andConditions.push({
           $or: values.map(v => ({ [field]: v }))
         });
+        console.log('State filter conditions (getAllLeads):', values.map(v => ({ [field]: v })));
       }
     } else {
       andConditions.push({ [field]: value });
+      console.log('Single state filter condition (getAllLeads):', { [field]: value });
     }
   });
 
@@ -130,16 +138,24 @@ const findLeads = async (filters, paginationOptions) => {
   Object.entries(filtersData).forEach(([field, value]) => {
     if (!value || value === '__ALL__') return;
 
+    // Normalize state filter
+    if (field === 'state') {
+      value = value.toUpperCase().trim();
+      console.log('State filter value (findLeads):', value);
+    }
+
     if (value.includes(',')) {
-      const values = value.split(',').filter(v => v !== '__ALL__');
+      const values = value.split(',').map(v => v.trim().toUpperCase()).filter(v => v !== '__ALL__');
       if (values.length > 0) {
         // Use $or for multiple values of the same field
         andConditions.push({
           $or: values.map(v => ({ [field]: v }))
         });
+        console.log('State filter conditions (findLeads):', values.map(v => ({ [field]: v })));
       }
     } else {
       andConditions.push({ [field]: value });
+      console.log('Single state filter condition (findLeads):', { [field]: value });
     }
   });
 
