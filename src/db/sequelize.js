@@ -22,14 +22,22 @@ export const sequelize = new Sequelize(database, user, password, {
   },
 });
 
+let initialized = false;
 export async function initializeDatabase() {
-  // Ensure database exists
-  const connection = await mysql.createConnection({ host, port, user, password });
-  await connection.query(
-    `CREATE DATABASE IF NOT EXISTS \`${database}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;`
-  );
-  await connection.end();
+  if (initialized) return;
+
+  // In production, assume DB exists and schema is migrated externally
+  if (config.env !== 'production') {
+    const connection = await mysql.createConnection({ host, port, user, password });
+    await connection.query(
+      `CREATE DATABASE IF NOT EXISTS \`${database}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;`
+    );
+    await connection.end();
+  }
 
   await sequelize.authenticate();
-  await sequelize.sync();
+  if (config.env !== 'production') {
+    await sequelize.sync();
+  }
+  initialized = true;
 }
