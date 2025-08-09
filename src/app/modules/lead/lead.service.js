@@ -76,17 +76,27 @@ const getAllLeads = async (filters, paginationOptions) => {
     }
 
     if (value.includes(',')) {
-      const values = value.split(',').map(v => v.trim().toUpperCase()).filter(v => v !== '__ALL__');
+      const values = value
+        .split(',')
+        .map(v => v.trim().toUpperCase())
+        .filter(v => v !== '__ALL__');
       if (values.length > 0) {
         // Use $or for multiple values of the same field
         andConditions.push({
-          $or: values.map(v => ({ [field]: v }))
+          $or: values.map(v => ({ [field]: v })),
         });
-        console.log('State filter conditions (getAllLeads):', values.map(v => ({ [field]: v })));
+        console.log(
+          'State filter conditions (getAllLeads):',
+          values.map(v => ({ [field]: v })),
+        );
       }
     } else {
-      andConditions.push({ [field]: value });
-      console.log('Single state filter condition (getAllLeads):', { [field]: value });
+      andConditions.push({
+        [field]: value,
+      });
+      console.log('Single state filter condition (getAllLeads):', {
+        [field]: value,
+      });
     }
   });
 
@@ -98,10 +108,30 @@ const getAllLeads = async (filters, paginationOptions) => {
   const whereConditions =
     andConditions.length > 0 ? { $and: andConditions } : {};
 
+  // If no pagination options are provided, return all data
+  if (!paginationOptions || Object.keys(paginationOptions).length === 0) {
+    const result = await Lead.find(whereConditions)
+      .sort(sortConditions)
+      .lean();
+
+    const total = await Lead.countDocuments(whereConditions);
+
+    return {
+      meta: {
+        page: 1,
+        limit: total,
+        total,
+      },
+      data: result,
+    };
+  }
+
+  // Otherwise, apply pagination
   const result = await Lead.find(whereConditions)
     .sort(sortConditions)
     .skip(skip)
-    .limit(limit);
+    .limit(limit)
+    .lean();
 
   const total = await Lead.countDocuments(whereConditions);
 

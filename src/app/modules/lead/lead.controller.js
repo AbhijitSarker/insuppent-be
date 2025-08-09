@@ -35,10 +35,7 @@ const getAllLeads = catchAsync(async (req, res) => {
   const filters = pick(req.query, leadFilterableFields);
   const paginationOptions = pick(req.query, paginationFields);
 
-  const result = await LeadService.getAllLeads(
-    filters,
-    paginationOptions,
-  );
+  const result = await LeadService.getAllLeads(filters, paginationOptions);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
