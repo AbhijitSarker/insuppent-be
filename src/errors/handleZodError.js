@@ -1,9 +1,9 @@
 import httpStatus from 'http-status';
 
 // Handle Zod validation errors
-const handleZodError = (error) => {
+const handleZodError = error => {
   // Map Zod issues to a list of error messages
-  const errors = error.errors.map((error) => {
+  const errors = error.errors.map(error => {
     return {
       path: error.path[error.path.length - 1], // Extract the field causing the error
       message: error.message, // Include the error message

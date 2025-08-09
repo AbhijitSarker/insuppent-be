@@ -1,54 +1,63 @@
-import { Schema, model } from 'mongoose';
+import { DataTypes, Model } from 'sequelize';
+import { sequelize } from '../../../db/sequelize.js';
 
-const leadSchema = new Schema({
-  name: {
-    type: String,
-    required: true
-  },
-  email: {
-    type: String,
-    required: true,
-    lowercase: true,
-    trim: true
-  },
-  phone: {
-    type: String,
-    required: true
-  },
-  address: {
-    type: String,
-    required: true
-  },
-  zipCode: {
-    type: String,
-    trim: true,
-  },
-  state: {
-    type: String,
-    trim: true,
-  },
-  type: {
-    type: String,
-    required: true,
-  },
-  status: {
-    type: String,
-    enum: ['public', 'private'],
-    default: 'public'
-  },
-  saleCount: {
-    type: Number,
-    default: 0
-  },
-  maxLeadSaleCount: {
-    type: Number,
-    default: 3
-  },
-}, {
-  timestamps: true,
-  toJSON: {
-    virtuals: true,
-  },
-});
+export class Lead extends Model {}
 
-export const Lead = model('Lead', leadSchema);
+Lead.init(
+  {
+    id: {
+      type: DataTypes.INTEGER.UNSIGNED,
+      autoIncrement: true,
+      primaryKey: true,
+    },
+    name: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    email: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    phone: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    address: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    zipCode: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    state: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    type: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    status: {
+      type: DataTypes.ENUM('public', 'private'),
+      allowNull: false,
+      defaultValue: 'public',
+    },
+    saleCount: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      defaultValue: 0,
+    },
+    maxLeadSaleCount: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      defaultValue: 3,
+    },
+  },
+  {
+    sequelize,
+    modelName: 'Lead',
+    tableName: 'Lead',
+    timestamps: true,
+  },
+);

@@ -7,7 +7,7 @@ export const USER_MESSAGES = {
   DELETE_SUCCESS: 'User deleted successfully',
   FETCH_SINGLE_SUCCESS: 'User retrieved successfully',
   NOT_FOUND: 'User not found',
-  CREATION_FAILED: 'Failed to create user'
+  CREATION_FAILED: 'Failed to create user',
 };
 
 export const ADMIN_MESSAGES = {
@@ -31,7 +31,6 @@ export const AUTH_MESSAGES = {
   INVALID_OLD_PASSWORD: 'Invalid old password',
   FORBIDDEN: 'Forbidden',
 };
-
 
 export const ACADEMIC_DEPARTMENT_MESSAGES = {
   CREATE_SUCCESS: 'Academic department created successfully',

@@ -7,41 +7,23 @@ import { ENUM_USER_ROLE } from '../../../enums/user.js';
 
 const router = express.Router();
 
-router.post(
-  '/webhook',
-  LeadController.webhookHandler,
-);
+router.post('/webhook', LeadController.webhookHandler);
 
 // Protected routes
-router.get(
-  '/',
-  auth(ENUM_USER_ROLE.ADMIN),
-  LeadController.getAllLeads
-);
-router.get(
-  '/find',
-  LeadController.findLeads,
-);
-router.get(
-  '/:id',
-  auth(ENUM_USER_ROLE.ADMIN),
-  LeadController.getSingleLead,
-);
+router.get('/', auth(ENUM_USER_ROLE.ADMIN), LeadController.getAllLeads);
+router.get('/find', LeadController.findLeads);
+router.get('/:id', auth(ENUM_USER_ROLE.ADMIN), LeadController.getSingleLead);
 router.patch(
   '/:id',
   auth(ENUM_USER_ROLE.ADMIN),
   validateRequest(LeadValidation.updateLeadZodSchema),
-  LeadController.updateLead
+  LeadController.updateLead,
 );
-router.delete(
-  '/:id',
-  auth(ENUM_USER_ROLE.ADMIN),
-  LeadController.deleteLead
-);
+router.delete('/:id', auth(ENUM_USER_ROLE.ADMIN), LeadController.deleteLead);
 router.patch(
   '/:id/status',
   auth(ENUM_USER_ROLE.ADMIN),
-  LeadController.updateStatus
+  LeadController.updateStatus,
 );
 
 export const LeadRoutes = router;

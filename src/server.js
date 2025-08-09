@@ -1,6 +1,6 @@
-import mongoose from 'mongoose';
 import config from './config/index.js';
 import app from './app.js';
+import { initializeDatabase } from './db/sequelize.js';
 
 // Handle uncaught exceptions
 process.on('uncaughtException', error => {
@@ -12,11 +12,9 @@ let server;
 
 async function bootstrap() {
   try {
-    // Connect to the database
-    await mongoose.connect(config.database.url, {
-      dbName: config.database.dbName,
-    });
-    console.log('🛢   Database is connected successfully');
+    // Connect to the MySQL database
+    await initializeDatabase();
+    console.log('🛢   MySQL database is connected successfully');
 
     // Start the server
     server = app.listen(config.port, () => {

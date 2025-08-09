@@ -1,5 +1,5 @@
 // Middleware to validate requests using a Zod schema
-const validateRequest = (schema) => async (req, res, next) => {
+const validateRequest = schema => async (req, res, next) => {
   try {
     // Validate request data (body, query, params, cookies)
     await schema.parseAsync({

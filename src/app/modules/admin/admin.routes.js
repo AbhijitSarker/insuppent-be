@@ -11,13 +11,13 @@ const router = express.Router();
 router.post(
   '/signup',
   validateRequest(adminValidation.createAdmin),
-  AdminController.createAdmin
+  AdminController.createAdmin,
 );
 
 router.post(
   '/login',
   validateRequest(adminValidation.loginAdmin),
-  AdminController.loginAdmin
+  AdminController.loginAdmin,
 );
 
 router.post('/refresh-token', AdminController.refreshToken);
@@ -26,14 +26,14 @@ router.post('/refresh-token', AdminController.refreshToken);
 router.get(
   '/profile',
   auth(ENUM_USER_ROLE.ADMIN, ENUM_USER_ROLE.SUPER_ADMIN),
-  AdminController.getAdminProfile
+  AdminController.getAdminProfile,
 );
 
 router.patch(
   '/profile',
   auth(ENUM_USER_ROLE.ADMIN, ENUM_USER_ROLE.SUPER_ADMIN),
   validateRequest(adminValidation.updateAdmin),
-  AdminController.updateAdminProfile
+  AdminController.updateAdminProfile,
 );
 
 export const AdminRoutes = router;

@@ -1,7 +1,7 @@
 import httpStatus from 'http-status';
 
-const handleValidationError = (error) => {
-  const errors = Object.values(error.errors).map((el) => {
+const handleValidationError = error => {
+  const errors = Object.values(error.errors).map(el => {
     return {
       path: el?.path,
       message: el?.message,

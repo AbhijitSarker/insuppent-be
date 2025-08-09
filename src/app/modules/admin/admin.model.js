@@ -1,56 +1,70 @@
-import mongoose from 'mongoose';
 import bcrypt from 'bcrypt';
+import { DataTypes, Model } from 'sequelize';
+import { sequelize } from '../../../db/sequelize.js';
 import config from '../../../config/index.js';
 
-const adminSchema = new mongoose.Schema(
+export class Admin extends Model {
+  async isPasswordMatched(givenPassword) {
+    return bcrypt.compare(givenPassword, this.password);
+  }
+}
+
+Admin.init(
   {
+    id: {
+      type: DataTypes.INTEGER.UNSIGNED,
+      autoIncrement: true,
+      primaryKey: true,
+    },
     name: {
-      type: String,
-      required: true,
+      type: DataTypes.STRING,
+      allowNull: false,
     },
     email: {
-      type: String,
-      required: true,
+      type: DataTypes.STRING,
+      allowNull: false,
       unique: true,
     },
     password: {
-      type: String,
-      required: true,
-      select: false,
+      type: DataTypes.STRING,
+      allowNull: false,
     },
     role: {
-      type: String,
-      enum: ['admin', 'super_admin'],
-      default: 'admin',
+      type: DataTypes.ENUM('admin', 'super_admin'),
+      allowNull: false,
+      defaultValue: 'admin',
     },
     status: {
-      type: String,
-      enum: ['active', 'inactive'],
-      default: 'active',
+      type: DataTypes.ENUM('active', 'inactive'),
+      allowNull: false,
+      defaultValue: 'active',
     },
   },
   {
+    sequelize,
+    modelName: 'Admin',
+    tableName: 'Admin',
     timestamps: true,
-    toJSON: {
-      virtuals: true,
-      transform: function (doc, ret) {
-        delete ret.password;
-        return ret;
+    defaultScope: {
+      attributes: { exclude: ['password'] },
+    },
+    hooks: {
+      beforeCreate: async admin => {
+        if (admin.password) {
+          admin.password = await bcrypt.hash(
+            admin.password,
+            Number(config.bcrypt_salt_rounds),
+          );
+        }
+      },
+      beforeUpdate: async admin => {
+        if (admin.changed('password')) {
+          admin.password = await bcrypt.hash(
+            admin.password,
+            Number(config.bcrypt_salt_rounds),
+          );
+        }
       },
     },
-  }
+  },
 );
-
-// Hash password before saving
-adminSchema.pre('save', async function (next) {
-  if (!this.isModified('password')) return next();
-  this.password = await bcrypt.hash(this.password, Number(config.bcrypt_salt_rounds));
-  next();
-});
-
-// Check if password matches
-adminSchema.methods.isPasswordMatched = async function (givenPassword) {
-  return await bcrypt.compare(givenPassword, this.password);
-};
-
-export const Admin = mongoose.model('Admin', adminSchema);

@@ -2,7 +2,7 @@ import httpStatus from 'http-status';
 import catchAsync from '../../../shared/catchAsync.js';
 import sendResponse from '../../../shared/sendResponse.js';
 import { LeadService } from './lead.service.js';
-import { leadFilterableFields, leadSearchableFields } from './lead.constants.js';
+import { leadFilterableFields } from './lead.constants.js';
 import { paginationFields } from '../../../constants/pagination.js';
 import pick from '../../../shared/pick.js';
 import { LEAD_MESSAGES } from '../../../enums/messages.js';
@@ -32,42 +32,31 @@ const getSingleLead = catchAsync(async (req, res) => {
 });
 
 const getAllLeads = catchAsync(async (req, res) => {
-  const filters = pick(req.query, leadFilterableFields);
-  const paginationOptions = pick(req.query, paginationFields);
-
-  const result = await LeadService.getAllLeads(filters, paginationOptions);
+  const result = await LeadService.getAllLeads();
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
     message: LEAD_MESSAGES.FETCH_ALL_SUCCESS,
-    meta: result.meta,
-    data: result.data,
+    data: result,
   });
 });
 
 const findLeads = catchAsync(async (req, res) => {
-  const filters = pick(req.query, leadFilterableFields);
-  const paginationOptions = pick(req.query, paginationFields);
-
-  const result = await LeadService.findLeads(
-    filters,
-    paginationOptions,
-  );
+  const result = await LeadService.findLeads();
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
     message: LEAD_MESSAGES.FETCH_ALL_SUCCESS,
-    meta: result.meta,
-    data: result.data,
+    data: result,
   });
 });
 
 const updateLead = catchAsync(async (req, res) => {
   const id = req.params.id;
   const updatedData = req.body;
-  
+
   const result = await LeadService.updateLead(id, updatedData);
 
   sendResponse(res, {
@@ -80,7 +69,7 @@ const updateLead = catchAsync(async (req, res) => {
 
 const deleteLead = catchAsync(async (req, res) => {
   const id = req.params.id;
-  
+
   const result = await LeadService.deleteLead(id);
 
   sendResponse(res, {
@@ -94,9 +83,9 @@ const deleteLead = catchAsync(async (req, res) => {
 const updateStatus = catchAsync(async (req, res) => {
   const { id } = req.params;
   const { status } = req.body;
-  
+
   const result = await LeadService.updateStatus(id, status);
-  
+
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,

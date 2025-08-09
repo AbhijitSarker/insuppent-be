@@ -4,9 +4,11 @@ import ApiError from '../../../errors/ApiError.js';
 import { jwtHelpers } from '../../../helpers/jwtHelpers.js';
 import config from '../../../config/index.js';
 
-const createAdmin = async (payload) => {
+const createAdmin = async payload => {
   // Check if admin with email already exists
-  const existingAdmin = await Admin.findOne({ email: payload.email });
+  const existingAdmin = await Admin.findOne({
+    where: { email: payload.email },
+  });
   if (existingAdmin) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'Email already exists');
   }
@@ -15,10 +17,13 @@ const createAdmin = async (payload) => {
   return result;
 };
 
-const loginAdmin = async (payload) => {
+const loginAdmin = async payload => {
   const { email, password } = payload;
 
-  const admin = await Admin.findOne({ email }).select('+password');
+  const admin = await Admin.scope(null).findOne({
+    where: { email },
+    attributes: { include: ['password'] },
+  });
   if (!admin) {
     throw new ApiError(httpStatus.NOT_FOUND, 'Admin not found');
   }
@@ -35,21 +40,21 @@ const loginAdmin = async (payload) => {
   // Create access token
   const accessToken = jwtHelpers.createToken(
     {
-      id: admin._id,
+      id: admin.id,
       role: admin.role,
     },
     config.jwt.secret,
-    config.jwt.expires_in
+    config.jwt.expires_in,
   );
 
   // Create refresh token
   const refreshToken = jwtHelpers.createToken(
     {
-      id: admin._id,
+      id: admin.id,
       role: admin.role,
     },
     config.jwt.refresh_secret,
-    config.jwt.refresh_expires_in
+    config.jwt.refresh_expires_in,
   );
 
   return {
@@ -58,7 +63,7 @@ const loginAdmin = async (payload) => {
   };
 };
 
-const refreshToken = async (token) => {
+const refreshToken = async token => {
   let verifiedToken = null;
   try {
     verifiedToken = jwtHelpers.verifyToken(token, config.jwt.refresh_secret);
@@ -66,7 +71,7 @@ const refreshToken = async (token) => {
     throw new ApiError(httpStatus.UNAUTHORIZED, 'Invalid refresh token');
   }
 
-  const admin = await Admin.findById(verifiedToken.id);
+  const admin = await Admin.findByPk(verifiedToken.id);
   if (!admin) {
     throw new ApiError(httpStatus.NOT_FOUND, 'Admin not found');
   }
@@ -81,7 +86,7 @@ const refreshToken = async (token) => {
       role: admin.role,
     },
     config.jwt.secret,
-    config.jwt.expires_in
+    config.jwt.expires_in,
   );
 
   return {
@@ -89,8 +94,8 @@ const refreshToken = async (token) => {
   };
 };
 
-const getAdminProfile = async (id) => {
-  const result = await Admin.findById(id);
+const getAdminProfile = async id => {
+  const result = await Admin.findByPk(id);
   if (!result) {
     throw new ApiError(httpStatus.NOT_FOUND, 'Admin not found');
   }
@@ -98,19 +103,22 @@ const getAdminProfile = async (id) => {
 };
 
 const updateAdminProfile = async (id, payload) => {
-  const admin = await Admin.findById(id);
+  const admin = await Admin.findByPk(id);
   if (!admin) {
     throw new ApiError(httpStatus.NOT_FOUND, 'Admin not found');
   }
 
   if (payload.email && payload.email !== admin.email) {
-    const existingAdmin = await Admin.findOne({ email: payload.email });
+    const existingAdmin = await Admin.findOne({
+      where: { email: payload.email },
+    });
     if (existingAdmin) {
       throw new ApiError(httpStatus.BAD_REQUEST, 'Email already exists');
     }
   }
 
-  const result = await Admin.findByIdAndUpdate(id, payload, { new: true });
+  await Admin.update(payload, { where: { id } });
+  const result = await Admin.findByPk(id);
   return result;
 };
 

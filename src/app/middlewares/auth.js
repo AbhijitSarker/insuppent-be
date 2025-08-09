@@ -12,11 +12,12 @@ const auth = (...requiredRoles) => {
       }
 
       // Remove Bearer from token
-      const accessToken = token.startsWith('Bearer ')
-        ? token.slice(7)
-        : token;
+      const accessToken = token.startsWith('Bearer ') ? token.slice(7) : token;
 
-      const verifiedUser = jwtHelpers.verifyToken(accessToken, config.jwt.secret);
+      const verifiedUser = jwtHelpers.verifyToken(
+        accessToken,
+        config.jwt.secret,
+      );
 
       req.user = verifiedUser;
 
