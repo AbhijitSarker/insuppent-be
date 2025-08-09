@@ -32,7 +32,7 @@ app.use((req, res, next) => {
     errorMessages: [
       {
         path: req.originalUrl,
-        message: 'API Endpoint Not Found',
+        message: 'API Endpoint Not Available',
       },
     ],
   });
