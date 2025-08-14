@@ -32,15 +32,6 @@ export const AUTH_MESSAGES = {
   FORBIDDEN: 'Forbidden',
 };
 
-export const ACADEMIC_DEPARTMENT_MESSAGES = {
-  CREATE_SUCCESS: 'Academic department created successfully',
-  UPDATE_SUCCESS: 'Academic department updated successfully',
-  DELETE_SUCCESS: 'Academic department deleted successfully',
-  FETCH_SINGLE_SUCCESS: 'Academic department retrieved successfully',
-  FETCH_ALL_SUCCESS: 'Academic departments retrieved successfully',
-  NOT_FOUND: 'Academic department not found',
-};
-
 export const LEAD_MESSAGES = {
   CREATE_SUCCESS: 'Lead created successfully',
   UPDATE_SUCCESS: 'Lead updated successfully',
