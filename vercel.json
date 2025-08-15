@@ -6,11 +6,6 @@
             "use": "@vercel/node"
         }
     ],
-  "functions": {
-    "src/serverless.js": {
-      "includeFiles": "node_modules/mysql2/**"
-    }
-  },
     "routes": [
         {
       "src": "/(.*)",
