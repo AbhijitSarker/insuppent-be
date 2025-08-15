@@ -13,12 +13,12 @@ import config from '../config/index.js';
 // } = config.mysql || {};
 
 const {
-  host = 'mysql-ebbc509-insuppent.d.aivencloud.com',
-  port = 10570,
-  user = 'avnadmin',
-  password = 'AVNS_CJBnCINfqpX2EuZAyJH',
-  database = 'defaultdb',
-  logging = false,
+  host,
+  port,
+  user,
+  password,
+  database,
+  logging,
 } = config.mysql || {};
 
 export const sequelize = new Sequelize(database, user, password, {
