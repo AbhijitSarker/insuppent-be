@@ -11,9 +11,10 @@ async function ensureReady() {
   }
 }
 
-export const handler = async (event, context) => {
+
+export default async function handler(req, res) {
   await ensureReady();
   const h = serverless(app);
-  return h(event, context);
-};
+  return h(req, res);
+}
 
