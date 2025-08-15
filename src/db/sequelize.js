@@ -36,7 +36,7 @@ let initialized = false;
 export async function initializeDatabase() {
   if (initialized) return;
 
-  // In production, assume DB exists and schema is migrated externally
+  // TEMP: Allow sync in production to create tables if missing. Remove after first run!
   if (config.env !== 'production') {
     const connection = await mysql.createConnection({ host, port, user, password });
     await connection.query(
@@ -46,8 +46,8 @@ export async function initializeDatabase() {
   }
 
   await sequelize.authenticate();
-  if (config.env !== 'production') {
-    await sequelize.sync();
-  }
+  // --- REMOVE THIS BLOCK AFTER TABLES ARE CREATED IN PRODUCTION ---
+  await sequelize.sync();
+  // --------------------------------------------------------------
   initialized = true;
 }
