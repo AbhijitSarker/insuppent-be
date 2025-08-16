@@ -1,4 +1,6 @@
 import { initializeDatabase, sequelize } from '../db/sequelize.js';
+// Import all models before initializing database to ensure registration
+import { User } from '../app/modules/user/user.model.js';
 import { Lead } from '../app/modules/lead/lead.model.js';
 import { Admin } from '../app/modules/admin/admin.model.js';
 
@@ -19,33 +21,61 @@ async function runSeed() {
       console.log('Seeded default admin: admin@example.com / secret123');
     }
 
+    // Seed users if none exists
+    const userCount = await User.count();
+    if (userCount === 0) {
+      await User.bulkCreate([
+        { name: 'Courtney Henry', email: 'courtney.henry@example.com', password: 'password123', status: 'active', subscription: 'Basic', avatar: 'C' },
+        { name: 'Floyd Miles', email: 'floyd.miles@example.com', password: 'password123', status: 'active', subscription: 'Basic', avatar: 'F' },
+        { name: 'Kristin Watson', email: 'kristin.watson@example.com', password: 'password123', status: 'active', subscription: 'Basic', avatar: 'K' },
+        { name: 'Robert Fox', email: 'robert.fox@example.com', password: 'password123', status: 'inactive', subscription: 'Basic', avatar: 'R' },
+        { name: 'Jane Cooper', email: 'jane.cooper@example.com', password: 'password123', status: 'active', subscription: 'Basic', avatar: 'J' },
+        { name: 'Leslie Alexander', email: 'leslie.alexander@example.com', password: 'password123', status: 'inactive', subscription: 'Basic', avatar: 'L' },
+        { name: 'Dianne Russell', email: 'dianne.russell@example.com', password: 'password123', status: 'active', subscription: 'Basic', avatar: 'D' },
+        { name: 'Brooklyn Simmons', email: 'brooklyn.simmons@example.com', password: 'password123', status: 'active', subscription: 'Basic', avatar: 'B' },
+        { name: 'Jacob Jones', email: 'jacob.jones@example.com', password: 'password123', status: 'inactive', subscription: 'Basic', avatar: 'J' },
+        { name: 'Kathryn Murphy', email: 'kathryn.murphy@example.com', password: 'password123', status: 'active', subscription: 'Basic', avatar: 'K' },
+        { name: 'Ronald Richards', email: 'ronald.richards@example.com', password: 'password123', status: 'active', subscription: 'Basic', avatar: 'R' },
+        { name: 'Debbie Baker', email: 'debbie.baker@example.com', password: 'password123', status: 'inactive', subscription: 'Basic', avatar: 'D' },
+        { name: 'Jessica Hanson', email: 'jessica.hanson@example.com', password: 'password123', status: 'active', subscription: 'Basic', avatar: 'J' },
+        { name: 'Michael Chen', email: 'michael.chen@example.com', password: 'password123', status: 'active', subscription: 'Basic', avatar: 'M' },
+        { name: 'Sarah Davis', email: 'sarah.davis@example.com', password: 'password123', status: 'inactive', subscription: 'Basic', avatar: 'S' },
+        { name: 'David Wilson', email: 'david.wilson@example.com', password: 'password123', status: 'active', subscription: 'Basic', avatar: 'D' },
+        { name: 'Emily Taylor', email: 'emily.taylor@example.com', password: 'password123', status: 'active', subscription: 'Basic', avatar: 'E' },
+        { name: 'James Lee', email: 'james.lee@example.com', password: 'password123', status: 'inactive', subscription: 'Basic', avatar: 'J' },
+        { name: 'Linda Martinez', email: 'linda.martinez@example.com', password: 'password123', status: 'active', subscription: 'Basic', avatar: 'L' },
+        { name: 'Thomas Clark', email: 'thomas.clark@example.com', password: 'password123', status: 'active', subscription: 'Basic', avatar: 'T' },
+      ]);
+      console.log('Seeded sample users');
+    }
+
     // Seed leads if none exists
     const leadCount = await Lead.count();
     if (leadCount === 0) {
       await Lead.bulkCreate([
         {
-          "name": "Alice Brown",
-          "email": "alice.brown@example.com",
-          "phone": "5552345678",
-          "address": "101 Elm St",
-          "zipCode": "60601",
-          "state": "IL",
-          "type": "auto",
-          "status": "public",
-          "saleCount": 2,
-          "maxLeadSaleCount": 3
+          name: 'Alice Brown',
+          email: 'alice.brown@example.com',
+          phone: '5552345678',
+          address: '101 Elm St',
+          zipCode: '60601',
+          state: 'IL',
+          type: 'auto',
+          status: 'public',
+          saleCount: 2,
+          maxLeadSaleCount: 3
         },
         {
-          "name": "Michael Chen",
-          "email": "michael.chen@example.com",
-          "phone": "5553456789",
-          "address": "202 Birch Ln",
-          "zipCode": "33101",
-          "state": "FL",
-          "type": "home",
-          "status": "private",
-          "saleCount": 0,
-          "maxLeadSaleCount": 3
+          name: "Michael Chen",
+          email: "michael.chen@example.com",
+          phone: "5553456789",
+          address: "202 Birch Ln",
+          zipCode: "33101",
+          state: "FL",
+          type: "home",
+          status: "private",
+          saleCount: 0,
+          maxLeadSaleCount: 3
         },
         {
           "name": "Sarah Davis",
