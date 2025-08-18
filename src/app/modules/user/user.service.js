@@ -1,3 +1,12 @@
+const updateUserStatus = async (id, status) => {
+  const user = await User.findByPk(id);
+  if (!user) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'User not found');
+  }
+  user.status = status;
+  await user.save();
+  return user;
+};
 import { User } from './user.model.js';
 import ApiError from '../../../errors/ApiError.js';
 import httpStatus from 'http-status';
@@ -31,4 +40,5 @@ export const UserService = {
   createUser,
   getAllUsers,
   getSingleUser,
+  updateUserStatus,
 };

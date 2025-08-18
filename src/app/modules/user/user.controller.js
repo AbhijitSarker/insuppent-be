@@ -1,7 +1,19 @@
+
 import httpStatus from 'http-status';
 import catchAsync from '../../../shared/catchAsync.js';
 import sendResponse from '../../../shared/sendResponse.js';
 import { UserService } from './user.service.js';
+const updateUserStatus = catchAsync(async (req, res) => {
+  const { id } = req.params;
+  const { status } = req.body;
+  const result = await UserService.updateUserStatus(id, status);
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'User status updated successfully',
+    data: result,
+  });
+});
 
 const createUser = catchAsync(async (req, res) => {
   const result = await UserService.createUser(req.body);
@@ -38,4 +50,5 @@ export const UserController = {
   createUser,
   getAllUsers,
   getSingleUser,
+  updateUserStatus,
 };
