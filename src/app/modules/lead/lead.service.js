@@ -5,6 +5,7 @@ import { LEAD_MESSAGES } from '../../../enums/messages.js';
 import ApiError from '../../../errors/ApiError.js';
 import httpStatus from 'http-status';
 import { Op } from 'sequelize';
+import { calculateLeadPrice } from '../../../utils/leadPricing.js';
 
 const processWebhookData = async payload => {
   const body = parsePayload(payload);
@@ -49,13 +50,21 @@ const getAllLeads = async () => {
   return result;
 };
 
-const findLeads = async () => {
+const findLeads = async (memberLevelFromUser = 'basic') => {
   const result = await Lead.findAll({ where: { status: 'public' } });
-  const maskedResult = result.map(lead => ({
-    ...lead.toJSON(),
-    email: lead.email.replace(/(.{2})(.*)(@.*)/, '$1***$3'),
-    phone: lead.phone.replace(/(\d{3})(\d+)(\d{2})/, '$1****$3'),
-  }));
+  const maskedResult = result.map(lead => {
+    const leadObj = lead.toJSON();
+    // Use memberLevel from user (middleware), fallback to 'basic'
+    const memberLevel = memberLevelFromUser || 'basic';
+    const leadType = leadObj.leadType || leadObj.type || 'auto';
+    const price = calculateLeadPrice(memberLevel, leadType);
+    return {
+      ...leadObj,
+      email: leadObj.email.replace(/(.{2})(.*)(@.*)/, '$1***$3'),
+      phone: leadObj.phone.replace(/(\d{3})(\d+)(\d{2})/, '$1****$3'),
+      price,
+    };
+  });
   return maskedResult;
 };
 

@@ -2,9 +2,7 @@ import httpStatus from 'http-status';
 import catchAsync from '../../../shared/catchAsync.js';
 import sendResponse from '../../../shared/sendResponse.js';
 import { LeadService } from './lead.service.js';
-import { leadFilterableFields } from './lead.constants.js';
-import { paginationFields } from '../../../constants/pagination.js';
-import pick from '../../../shared/pick.js';
+
 import { LEAD_MESSAGES } from '../../../enums/messages.js';
 
 const webhookHandler = catchAsync(async (req, res) => {
@@ -43,7 +41,9 @@ const getAllLeads = catchAsync(async (req, res) => {
 });
 
 const findLeads = catchAsync(async (req, res) => {
-  const result = await LeadService.findLeads();
+  // Get membership info from req.user (set by auth middleware)
+  // const memberLevel = req.user?.membership || req.user?.memberLevel || 'basic';
+  const result = await LeadService.findLeads('agency');
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
