@@ -39,6 +39,7 @@
     "nodemailer": "^7.0.5",
     "sequelize": "^6.37.7",
     "serverless-http": "^3.2.0",
+    "stripe": "^18.4.0",
     "zipcodes": "^8.0.0",
     "zod": "^3.24.1"
   }

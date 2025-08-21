@@ -1,5 +1,7 @@
+
 import { DataTypes, Model } from 'sequelize';
 import { sequelize } from '../../../db/sequelize.js';
+import { LeadUser } from '../purchase/leadUser.model.js';
 
 export class Lead extends Model {}
 
@@ -61,3 +63,11 @@ Lead.init(
     timestamps: true,
   },
 );
+
+// Associations (call after all models are defined)
+export const associate = (models) => {
+  LeadUser.belongsTo(models.User, { foreignKey: 'userId' });
+  LeadUser.belongsTo(models.Lead, { foreignKey: 'leadId' });
+  models.User.hasMany(LeadUser, { foreignKey: 'userId' });
+  models.Lead.hasMany(LeadUser, { foreignKey: 'leadId' });
+};

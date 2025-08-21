@@ -1,6 +1,7 @@
 import express from 'express';
 
 import { LeadRoutes } from '../modules/lead/lead.routes.js';
+import purchaseRoutes from '../modules/purchase/leadPurchase.routes.js';
 import { AdminRoutes } from '../modules/admin/admin.routes.js';
 import { UserRoutes } from '../modules/user/user.routes.js';
 
@@ -10,6 +11,10 @@ const moduleRoutes = [
   {
     path: '/leads',
     route: LeadRoutes,
+  },
+  {
+    path: '/purchase',
+    route: purchaseRoutes,
   },
   {
     path: '/admin',

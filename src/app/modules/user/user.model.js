@@ -1,6 +1,7 @@
 import { DataTypes, Model } from 'sequelize';
 import { sequelize } from '../../../db/sequelize.js';
 
+import { LeadUser } from '../purchase/leadUser.model.js';
 export class User extends Model {}
 
 User.init(
@@ -44,3 +45,6 @@ User.init(
     timestamps: true,
   },
 );
+
+// Association for purchase history
+User.hasMany(LeadUser, { foreignKey: 'userId' });
