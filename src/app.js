@@ -3,14 +3,23 @@ import express from 'express';
 import httpStatus from 'http-status';
 import globalErrorHandler from './app/middlewares/globalErrorHandler.js';
 import routes from './app/routes/index.js';
+import { stripeWebhook } from './app/modules/purchase/leadPurchase.controller.js';
 import cookieParser from 'cookie-parser';
+import morgan from 'morgan';
+
 
 const app = express();
+// HTTP request logger
+app.use(morgan('dev'));
 
 app.use(cors());
 app.use(cookieParser());
 
-// Body parsers
+
+// Stripe webhook route must be registered BEFORE express.json()
+app.post('/api/v1/purchase/webhook', express.raw({ type: 'application/json' }), stripeWebhook);
+
+// Body parsers for all other routes
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 

@@ -1,4 +1,5 @@
-
+// Get all leads purchased by the current user
+import { getMyLeads } from './leadPurchase.service.js';
 
 import ApiError from '../../../errors/ApiError.js';
 import { getLeadsForPurchase, buildLineItems, recordLeadPurchases, getUserPurchaseHistory } from './leadPurchase.service.js';
@@ -8,6 +9,7 @@ export const createCheckoutSession = async (req, res, next) => {
   try {
     const { leadIds } = req.body;
     const userId = req.user.id;
+    console.log('User ID:', userId);
     if (!Array.isArray(leadIds) || leadIds.length === 0) return next(new ApiError(400, 'No leads selected'));
     const leads = await getLeadsForPurchase(leadIds, userId);
     const memberLevel = req.user.subscription || req.user.memberLevel || 'basic';
@@ -33,6 +35,7 @@ export const createCheckoutSession = async (req, res, next) => {
 
 
 export const stripeWebhook = async (req, res, next) => {
+  console.log('stripeWebhook called');
   let event;
   try {
     const sig = req.headers['stripe-signature'];
@@ -45,6 +48,7 @@ export const stripeWebhook = async (req, res, next) => {
     return res.status(400).send(`Webhook Error: ${err.message}`);
   }
   if (event.type === 'checkout.session.completed') {
+    console.log('checkout.session.completed event received');
     const session = event.data.object;
     const userId = session.metadata.userId;
     const leadIds = session.metadata.leadIds.split(',').map(Number);
@@ -58,6 +62,18 @@ export const getPurchaseHistory = async (req, res, next) => {
     const userId = req.user.id;
     const purchases = await getUserPurchaseHistory(userId);
     res.json({ data: purchases });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// GET /leads/my
+export const getMyLeadsController = async (req, res, next) => {
+  console.log('getMyLeadsController called', req.user);
+  try {
+    const userId = req.user.id;
+    const leads = await getMyLeads(userId);
+    res.json({ data: leads });
   } catch (err) {
     next(err);
   }

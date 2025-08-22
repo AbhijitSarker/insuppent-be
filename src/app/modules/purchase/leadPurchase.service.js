@@ -56,3 +56,24 @@ export async function getUserPurchaseHistory(userId) {
     order: [['purchasedAt', 'DESC']],
   });
 }
+
+
+// Get all leads purchased by a user, with lead details
+export async function getMyLeads(userId) {
+  // Ensure association is set up
+  if (!LeadUser.associations || !LeadUser.associations.Lead) {
+    LeadUser.belongsTo(Lead, { foreignKey: 'leadId' });
+  }
+  const leadUsers = await LeadUser.findAll({
+    where: { userId },
+    include: [{ model: Lead }],
+    order: [['purchasedAt', 'DESC']],
+  });
+  // Flatten to just lead data, but include purchase info
+  return leadUsers.map(lu => ({
+    ...lu.Lead?.toJSON?.(),
+    datePurchased: lu.purchasedAt,
+    price: undefined, // Optionally add price if you store it
+    status: 'active', // Or derive from your business logic
+  }));
+}
