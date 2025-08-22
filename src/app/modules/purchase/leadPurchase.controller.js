@@ -1,5 +1,6 @@
 import Stripe from 'stripe';
 import { Lead } from '../lead/lead.model.js';
+import { calculateLeadPrice } from '../../../utils/leadPricing.js';
 import { LeadUser } from './leadUser.model.js';
 import { User } from '../user/user.model.js';
 import ApiError from '../../../errors/ApiError.js';
@@ -15,7 +16,7 @@ async function getLeadsForPurchase(leadIds, userId) {
   // Check saleCount and user previous purchases
   for (const lead of leads) {
     if (lead.saleCount >= lead.maxLeadSaleCount) {
-      throw new ApiError(400, `Lead ${lead.id} has reached max sale count`);
+      throw new ApiError(400, `Lead ${lead.name} has reached max sale count`);
     }
     const alreadyPurchased = await LeadUser.findOne({ where: { userId, leadId: lead.id } });
     if (alreadyPurchased) {
@@ -25,23 +26,32 @@ async function getLeadsForPurchase(leadIds, userId) {
   return leads;
 }
 
-export const createCheckoutSession = async (req, res, next) => {
+export async function createCheckoutSession(req, res, next) {
   try {
     const { leadIds } = req.body;
+    console.log('Creating checkout session for leads:', leadIds);
     const userId = req.user.id;
     if (!Array.isArray(leadIds) || leadIds.length === 0) throw new ApiError(400, 'No leads selected');
     const leads = await getLeadsForPurchase(leadIds, userId);
-    const line_items = leads.map(lead => ({
+    console.log('Leads for purchase:', leads);
+    // Get user subscription/memberLevel for pricing
+    const memberLevel = req.user.subscription || req.user.memberLevel || 'basic';
+    const line_items = leads.map(lead => {
+      const price = calculateLeadPrice(memberLevel, lead.type);
+      if (!price) throw new ApiError(400, `No price found for lead type: ${lead.type}`);
+    return {
       price_data: {
         currency: 'usd',
         product_data: {
-          name: `Lead: ${lead.name}`,
-          description: `${lead.type} - ${lead.state}`,
+        name: `Lead: ${lead.name.charAt(0).toUpperCase() + lead.name.slice(1)}`,
+        description: `Type: ${lead.type.charAt(0).toUpperCase() + lead.type.slice(1)}`,
         },
-        unit_amount: Math.round(lead.price * 100),
+        unit_amount: Math.round(price * 100),
       },
       quantity: 1,
-    }));
+    };
+    });
+    console.log('Line items for Stripe:', line_items);
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items,
@@ -51,14 +61,14 @@ export const createCheckoutSession = async (req, res, next) => {
         userId,
         leadIds: leadIds.join(','),
       },
-      success_url: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/leads?success=1`,
-      cancel_url: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/leads?canceled=1`,
+      success_url: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/my-leads?success=1`,
+      cancel_url: `${process.env.FRONTEND_URL || 'http://localhost:5173'}?canceled=1`,
     });
     res.json({ url: session.url });
   } catch (err) {
     next(err);
   }
-};
+}
 
 export const stripeWebhook = async (req, res, next) => {
   let event;
