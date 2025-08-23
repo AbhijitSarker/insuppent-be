@@ -27,17 +27,40 @@ export async function callback(req, res) {
     return res.status(400).send('Invalid state or code');
   }
   try {
-    const tokenRes = await axios.post(WP_OAUTH_TOKEN, new URLSearchParams({
-      grant_type: 'authorization_code',
-      code,
-      redirect_uri: REDIRECT_URI,
-      client_id: CLIENT_ID,
-      client_secret: CLIENT_SECRET
-    }), {
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
-    });
-    const { access_token } = tokenRes.data;
+
+    let tokenRes;
+    try {
+      tokenRes = await axios.post(WP_OAUTH_TOKEN, new URLSearchParams({
+        grant_type: 'authorization_code',
+        code,
+        redirect_uri: REDIRECT_URI,
+        client_id: CLIENT_ID,
+        client_secret: CLIENT_SECRET
+      }), {
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+      });
+    } catch (tokenErr) {
+      console.error('Token endpoint network error:', {
+        data: tokenErr.response?.data,
+        status: tokenErr.response?.status,
+        headers: tokenErr.response?.headers,
+        message: tokenErr.message,
+        stack: tokenErr.stack
+      });
+      throw tokenErr;
+    }
+
+    console.log('Raw token response:', tokenRes && typeof tokenRes === 'object' ? {
+      status: tokenRes.status,
+      headers: tokenRes.headers,
+      data: tokenRes.data
+    } : tokenRes);
+
+    const { access_token } = tokenRes.data || {};
+    console.log('Access Token:', access_token);
+
     if (!access_token) throw new Error('No access token');
+
     const userRes = await axios.get(WP_OAUTH_ME, {
       headers: { Authorization: `Bearer ${access_token}` }
     });
@@ -54,7 +77,14 @@ export async function callback(req, res) {
   res.redirect(config.frontendUrl || '/');
     });
   } catch (err) {
-    res.status(500).send('OAuth error: ' + err.message);
+    console.error('OAuth token error:', {
+      data: err.response?.data,
+      status: err.response?.status,
+      headers: err.response?.headers,
+      message: err.message,
+      stack: err.stack
+    });
+    res.status(500).send('OAuth error: ' + (err.response?.data?.error_description || err.message));
   }
 }
 
