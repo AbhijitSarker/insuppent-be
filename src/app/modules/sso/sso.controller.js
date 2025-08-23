@@ -15,12 +15,14 @@ const REDIRECT_URI = config.wpRedirectUri;
 export function login(req, res) {
   const state = Math.random().toString(36).substring(2);
   req.session.oauthState = state;
+  console.log(`SSO login state: ${req.session.oauthState}`);
   const url = `${WP_OAUTH_AUTHORIZE}?response_type=code&client_id=${encodeURIComponent(CLIENT_ID)}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&state=${state}`;
   res.redirect(url);
 }
 
 export async function callback(req, res) {
   const { code, state } = req.query;
+  console.log(`SSO callback state: ${state}, session state: ${req.session.oauthState}`);
   if (!code || !state || state !== req.session.oauthState) {
     return res.status(400).send('Invalid state or code');
   }
