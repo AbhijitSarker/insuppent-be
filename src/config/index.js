@@ -27,4 +27,12 @@ export default {
   },
   stripeSecretKey: process.env.STRIPE_SECRET_KEY,
   stripeWebhookSecret: process.env.STRIPE_WEBHOOK_SECRET,
+  frontendUrl: process.env.FRONTEND_URL,
+  // WordPress SSO
+  wpOauthAuthorize: process.env.WP_OAUTH_AUTHORIZE,
+  wpOauthToken: process.env.WP_OAUTH_TOKEN,
+  wpOauthMe: process.env.WP_OAUTH_ME,
+  wpClientId: process.env.WP_CLIENT_ID,
+  wpClientSecret: process.env.WP_CLIENT_SECRET,
+  wpRedirectUri: process.env.WP_REDIRECT_URI,
 };

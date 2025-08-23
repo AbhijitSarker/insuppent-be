@@ -7,6 +7,8 @@ import { stripeWebhook } from './app/modules/purchase/leadPurchase.controller.js
 import cookieParser from 'cookie-parser';
 import morgan from 'morgan';
 
+import sessionMiddleware from './app/middlewares/session.js';
+
 
 const app = express();
 // HTTP request logger
@@ -14,6 +16,9 @@ app.use(morgan('dev'));
 
 app.use(cors());
 app.use(cookieParser());
+
+// Session middleware (for SSO)
+app.use(sessionMiddleware);
 
 
 // Stripe webhook route must be registered BEFORE express.json()

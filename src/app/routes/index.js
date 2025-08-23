@@ -5,6 +5,8 @@ import purchaseRoutes from '../modules/purchase/leadPurchase.routes.js';
 import { AdminRoutes } from '../modules/admin/admin.routes.js';
 import { UserRoutes } from '../modules/user/user.routes.js';
 
+import { SsoRoutes } from '../modules/sso/index.js';
+
 const router = express.Router();
 
 const moduleRoutes = [
@@ -23,6 +25,10 @@ const moduleRoutes = [
   {
     path: '/users',
     route: UserRoutes,
+  },
+  {
+    path: '/auth',
+    route: SsoRoutes,
   },
 ];
 

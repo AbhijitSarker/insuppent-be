@@ -1,4 +1,6 @@
 // Get all leads purchased by the current user
+
+import config from '../../../config/index.js';
 import { getMyLeads } from './leadPurchase.service.js';
 
 import ApiError from '../../../errors/ApiError.js';
@@ -23,8 +25,8 @@ export const createCheckoutSession = async (req, res, next) => {
         userId,
         leadIds: leadIds.join(','),
       },
-      success_url: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/my-leads?success=1`,
-      cancel_url: `${process.env.FRONTEND_URL || 'http://localhost:5173'}?canceled=1`,
+  success_url: `${config.frontendUrl || 'http://localhost:5173'}/my-leads?success=1`,
+  cancel_url: `${config.frontendUrl || 'http://localhost:5173'}?canceled=1`,
     });
     res.json({ url: session.url });
   } catch (err) {
@@ -42,7 +44,7 @@ export const stripeWebhook = async (req, res, next) => {
     event = constructStripeEvent(
       req.body,
       sig,
-      process.env.STRIPE_WEBHOOK_SECRET
+      config.stripeWebhookSecret
     );
   } catch (err) {
     return res.status(400).send(`Webhook Error: ${err.message}`);
