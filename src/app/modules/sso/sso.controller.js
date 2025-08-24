@@ -159,138 +159,23 @@ export function logout(req, res) {
   });
 }
 
-// // Check authentication status
-// export function checkAuth(req, res) {
-//   if (req.session.user && req.session.user.isAuthenticated) {
-//     // Update last activity
-//     req.session.user.lastActivity = new Date();
-
-//     const { accessToken, refreshToken, ...userData } = req.session.user;
-//     res.json({
-//       success: true,
-//       isAuthenticated: true,
-//       user: userData
-//     });
-//   } else {
-//     res.json({
-//       success: true,
-//       isAuthenticated: false,
-//       user: null
-//     });
-//   }
-// }
-
-
-
+// Check authentication status
 export function checkAuth(req, res) {
-  // Comprehensive debugging information
-  const debugInfo = {
-    timestamp: new Date().toISOString(),
-    sessionID: req.sessionID,
-    hasSession: !!req.session,
-    sessionKeys: req.session ? Object.keys(req.session) : [],
-    hasUser: !!req.session?.user,
-    userKeys: req.session?.user ? Object.keys(req.session.user) : [],
-    isAuthenticated: req.session?.user?.isAuthenticated,
-    userId: req.session?.user?.id,
-    username: req.session?.user?.username,
-    cookies: req.headers.cookie ? req.headers.cookie.split('; ') : [],
-    userAgent: req.headers['user-agent'],
-    origin: req.headers.origin,
-    referer: req.headers.referer,
-    xForwardedFor: req.headers['x-forwarded-for'],
-    remoteAddress: req.connection.remoteAddress,
-    ip: req.ip,
-    secure: req.secure,
-    protocol: req.protocol
-  };
-
-  console.log('CheckAuth Debug Info:', JSON.stringify(debugInfo, null, 2));
-
-  // Check if session exists
-  if (!req.session) {
-    console.error('❌ No session object found');
-    return res.json({
-      success: false,
-      isAuthenticated: false,
-      user: null,
-      error: 'No session found',
-      debug: debugInfo
-    });
-  }
-
-  // Check if user exists in session
-  if (!req.session.user) {
-    console.log('❌ No user in session');
-    return res.json({
-      success: true,
-      isAuthenticated: false,
-      user: null,
-      message: 'No user in session',
-      debug: debugInfo
-    });
-  }
-
-  // Check if user is authenticated
-  if (!req.session.user.isAuthenticated) {
-    console.log('❌ User exists but not authenticated');
-    return res.json({
-      success: true,
-      isAuthenticated: false,
-      user: null,
-      message: 'User not authenticated',
-      debug: debugInfo
-    });
-  }
-
-  // Check if user data is complete
-  if (!req.session.user.id || !req.session.user.username) {
-    console.error('❌ Incomplete user data in session');
-    return res.json({
-      success: false,
-      isAuthenticated: false,
-      user: null,
-      error: 'Incomplete user data',
-      debug: debugInfo
-    });
-  }
-
-  // All checks passed - user is authenticated
-  console.log('✅ User is authenticated:', {
-    id: req.session.user.id,
-    username: req.session.user.username,
-    roles: req.session.user.roles
-  });
-
-  try {
+  if (req.session.user && req.session.user.isAuthenticated) {
     // Update last activity
     req.session.user.lastActivity = new Date();
 
-    // Remove sensitive data
     const { accessToken, refreshToken, ...userData } = req.session.user;
-
-    // Force save session to ensure persistence
-    req.session.save((err) => {
-      if (err) {
-        console.error('Session save error in checkAuth:', err);
-      }
-    });
-
-    return res.json({
+    res.json({
       success: true,
       isAuthenticated: true,
-      user: userData,
-      debug: process.env.NODE_ENV === 'development' ? debugInfo : undefined
+      user: userData
     });
-
-  } catch (error) {
-    console.error('Error in checkAuth:', error);
-    return res.status(500).json({
-      success: false,
+  } else {
+    res.json({
+      success: true,
       isAuthenticated: false,
-      user: null,
-      error: 'Internal server error',
-      debug: debugInfo
+      user: null
     });
   }
 }
