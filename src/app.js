@@ -20,13 +20,12 @@ app.use(morgan('dev'));
 // CORS configuration for session-based authentication
 app.use(cors({
   origin: [
-    config.frontendUrl || 'http://localhost:3000',
-    'http://localhost:3000',
+    config.frontendUrl || 'http://localhost:5173',
     'http://localhost:5173',
     'https://insuppent-dev.netlify.app',
     'https://insuppent.onrender.com'
   ],
-  credentials: true, // Essential for session cookies
+  credentials: true,
   optionsSuccessStatus: 200,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
