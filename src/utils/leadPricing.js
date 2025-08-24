@@ -1,6 +1,6 @@
 export const calculateLeadPrice =(memberLevel, leadType) => {
   const pricing = {
-    basic: {
+    subscriber: {
       auto: 17.5,
       home: 21.5,
       mortgage: 25.5,

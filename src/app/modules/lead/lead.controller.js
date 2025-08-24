@@ -42,8 +42,8 @@ const getAllLeads = catchAsync(async (req, res) => {
 
 const findLeads = catchAsync(async (req, res) => {
   // Get membership info from req.user (set by auth middleware)
-  // const memberLevel = req.user?.membership || req.user?.memberLevel || 'basic';
-  const result = await LeadService.findLeads('agency');
+  const memberLevel = req.user?.membership || req.user?.memberLevel || 'subscriber';
+  const result = await LeadService.findLeads(memberLevel);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,

@@ -1,8 +1,15 @@
+
 import express from 'express';
 import { createCheckoutSession, stripeWebhook, getPurchaseHistory, getMyLeadsController } from './leadPurchase.controller.js';
-// import auth from '../../middlewares/auth.js';
+import sessionMiddleware from '../../middlewares/session.js';
+import { attachUser } from '../../middlewares/auth.js';
 
 const router = express.Router();
+
+
+// Apply session middleware to all purchase routes
+router.use(sessionMiddleware);
+router.use(attachUser)
 
 
 router.post('/checkout', createCheckoutSession);

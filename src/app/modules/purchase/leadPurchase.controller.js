@@ -8,13 +8,17 @@ import { getLeadsForPurchase, buildLineItems, recordLeadPurchases, getUserPurcha
 import { createStripeSession, constructStripeEvent } from './stripe.util.js';
 
 export const createCheckoutSession = async (req, res, next) => {
+  console.log('createCheckoutSession called', req.user);
   try {
     const { leadIds } = req.body;
+
     const userId = req.user.id;
-    console.log('User ID:', userId);
     if (!Array.isArray(leadIds) || leadIds.length === 0) return next(new ApiError(400, 'No leads selected'));
-    const leads = await getLeadsForPurchase(leadIds, userId);
-    const memberLevel = req.user.subscription || req.user.memberLevel || 'basic';
+    
+    const leads = await getLeadsForPurchase(leadIds, 5);
+    const memberLevel = req.user.wpRoles[0] || 'subscriber';
+console.log('Leads for Purchase:', memberLevel);
+
     const line_items = buildLineItems(leads, memberLevel);
     const session = await createStripeSession({
       payment_method_types: ['card'],

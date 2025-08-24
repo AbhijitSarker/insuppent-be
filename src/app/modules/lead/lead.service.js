@@ -50,12 +50,12 @@ const getAllLeads = async () => {
   return result;
 };
 
-const findLeads = async (memberLevelFromUser = 'basic') => {
+const findLeads = async (memberLevelFromUser = 'subscriber') => {
   const result = await Lead.findAll({ where: { status: 'public' } });
   const maskedResult = result.map(lead => {
     const leadObj = lead.toJSON();
-    // Use memberLevel from user (middleware), fallback to 'basic'
-    const memberLevel = memberLevelFromUser || 'basic';
+    // Use memberLevel from user (middleware), fallback to 'subscriber'
+    const memberLevel = memberLevelFromUser || 'subscriber';
     const leadType = leadObj.leadType || leadObj.type || 'auto';
     const price = calculateLeadPrice(memberLevel, leadType);
     return {
