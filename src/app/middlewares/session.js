@@ -30,10 +30,10 @@ const sessionMiddleware = session({
   saveUninitialized: false,
   store: sessionStore,
   cookie: {
-    secure: config.nodeEnv === 'production', // HTTPS only in production
+    secure: true, // HTTPS only in production
     httpOnly: true, // Prevent XSS attacks
     maxAge: 24 * 60 * 60 * 1000, // 24 hours
-    sameSite: config.nodeEnv === 'production' ? 'none' : 'lax' // For cross-origin requests in production
+    sameSite: 'none' // For cross-origin requests in production
   },
   rolling: true // Reset expiration on each request
 });
