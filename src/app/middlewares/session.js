@@ -30,10 +30,11 @@ const sessionMiddleware = session({
   saveUninitialized: false,
   store: sessionStore,
   cookie: {
-    secure: process.env.NODE_ENV === 'production', // true only in production
+    secure: true, // true only in production
     httpOnly: true,
     maxAge: 24 * 60 * 60 * 1000,
-    sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax' // None for cross-origin, Lax for local
+    // sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax' // None for cross-origin, Lax for local
+    sameSite: 'None' // None for cross-origin, Lax for local
   },
   rolling: true // Reset expiration on each request
 });
