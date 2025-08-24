@@ -12,6 +12,8 @@ import config from './config/index.js';
 
 
 const app = express();
+app.set('trust proxy', true);
+
 // HTTP request logger
 app.use(morgan('dev'));
 
