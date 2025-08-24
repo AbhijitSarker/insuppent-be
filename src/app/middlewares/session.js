@@ -1,23 +1,41 @@
-import { createRequire } from 'module';
-const require = createRequire(import.meta.url);
-const session = require('express-session');
-import dotenv from 'dotenv';
-dotenv.config();
+import session from 'express-session';
+import MySQLStore from 'express-mysql-session';
+import config from '../../config/index.js';
 
+const MySQLStoreSession = MySQLStore(session);
+const sessionStore = new MySQLStoreSession({
+  host: config.mysql.host,
+  port: config.mysql.port,
+  user: config.mysql.user,
+  password: config.mysql.password,
+  database: config.mysql.database,
+  clearExpired: true,
+  checkExpirationInterval: 900000, // 15 minutes
+  expiration: 86400000, // 24 hours
+  createDatabaseTable: true,
+  schema: {
+    tableName: 'sessions',
+    columnNames: {
+      session_id: 'session_id',
+      expires: 'expires',
+      data: 'data'
+    }
+  }
+});
 
-// For cross-site SSO, always set SameSite=None and Secure in production
-const isProduction = process.env.NODE_ENV === 'production';
 const sessionMiddleware = session({
-  secret: process.env.SESSION_SECRET || 'change_this_secret',
+  name: 'sso.sid', // Session name
+  secret: config.sessionSecret || 'your-super-secret-session-key-change-this-in-production',
   resave: false,
   saveUninitialized: false,
-  proxy: isProduction, // trust proxy for Render/Heroku
+  store: sessionStore,
   cookie: {
-    httpOnly: true,
-    secure: isProduction, // must be true for HTTPS
-    sameSite: isProduction ? 'none' : 'lax',
-    maxAge: 1000 * 60 * 60 * 24 // 1 day
-  }
+    secure: config.nodeEnv === 'production', // HTTPS only in production
+    httpOnly: true, // Prevent XSS attacks
+    maxAge: 24 * 60 * 60 * 1000, // 24 hours
+    sameSite: config.nodeEnv === 'production' ? 'none' : 'lax' // For cross-origin requests in production
+  },
+  rolling: true // Reset expiration on each request
 });
 
 export default sessionMiddleware;

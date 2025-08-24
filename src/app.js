@@ -8,13 +8,28 @@ import cookieParser from 'cookie-parser';
 import morgan from 'morgan';
 
 import sessionMiddleware from './app/middlewares/session.js';
+import config from './config/index.js';
 
 
 const app = express();
 // HTTP request logger
 app.use(morgan('dev'));
 
-app.use(cors());
+// app.use(cors());
+
+// CORS configuration for session-based authentication
+app.use(cors({
+  origin: [
+    config.frontendUrl || 'http://localhost:3000',
+    'http://localhost:3000',
+    'http://localhost:5173', // Vite dev server
+    'https://your-frontend-domain.com' // Add your production frontend URL
+  ],
+  credentials: true, // Essential for session cookies
+  optionsSuccessStatus: 200,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
+}));
 app.use(cookieParser());
 
 // Session middleware (for SSO)
@@ -30,10 +45,19 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use('/api/v1', routes);
 
-//Testing
+// Health check endpoint
 app.get('/', async (req, res) => {
-  res.send('Hello World');
+  res.json({
+    success: true,
+    message: 'Server is running',
+    session: req.session.id ? 'Session active' : 'No session',
+    timestamp: new Date().toISOString()
+  });
 });
+// //Testing
+// app.get('/', async (req, res) => {
+//   res.send('Hello World');
+// });
 
 //global error handler
 app.use(globalErrorHandler);

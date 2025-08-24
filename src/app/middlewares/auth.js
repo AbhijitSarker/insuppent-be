@@ -1,34 +1,66 @@
+// app/middlewares/auth.js
 import httpStatus from 'http-status';
-import ApiError from '../../errors/ApiError.js';
-import { jwtHelpers } from '../../helpers/jwtHelpers.js';
-import config from '../../config/index.js';
 
-const auth = (...requiredRoles) => {
-  return async (req, res, next) => {
-    try {
-      const token = req.headers.authorization;
-      if (!token) {
-        throw new ApiError(httpStatus.UNAUTHORIZED, 'You are not authorized');
-      }
+// Middleware to check if user is authenticated
+export const requireAuth = (req, res, next) => {
+  if (!req.session.user || !req.session.user.isAuthenticated) {
+    return res.status(httpStatus.UNAUTHORIZED).json({
+      success: false,
+      message: 'Authentication required',
+      errorMessages: [
+        {
+          path: req.originalUrl,
+          message: 'Please login to access this resource',
+        },
+      ],
+    });
+  }
+  next();
+};
 
-      // Remove Bearer from token
-      const accessToken = token.startsWith('Bearer ') ? token.slice(7) : token;
-
-      const verifiedUser = jwtHelpers.verifyToken(
-        accessToken,
-        config.jwt.secret,
-      );
-
-      req.user = verifiedUser;
-
-      if (requiredRoles.length && !requiredRoles.includes(verifiedUser.role)) {
-        throw new ApiError(httpStatus.FORBIDDEN, 'Forbidden');
-      }
-      next();
-    } catch (error) {
-      next(error);
+// Middleware to check if user has specific roles
+export const requireRole = (roles = []) => {
+  return (req, res, next) => {
+    if (!req.session.user || !req.session.user.isAuthenticated) {
+      return res.status(httpStatus.UNAUTHORIZED).json({
+        success: false,
+        message: 'Authentication required',
+        errorMessages: [
+          {
+            path: req.originalUrl,
+            message: 'Please login to access this resource',
+          },
+        ],
+      });
     }
+
+    const userRoles = req.session.user.roles || [];
+    const hasRole = roles.some(role => userRoles.includes(role));
+
+    if (!hasRole) {
+      return res.status(httpStatus.FORBIDDEN).json({
+        success: false,
+        message: 'Insufficient permissions',
+        errorMessages: [
+          {
+            path: req.originalUrl,
+            message: `Required roles: ${roles.join(', ')}`,
+          },
+        ],
+      });
+    }
+
+    next();
   };
 };
 
-export default auth;
+// Middleware to check if user is admin
+export const requireAdmin = requireRole(['admin', 'administrator']);
+
+// Middleware to attach user to request (optional, doesn't require auth)
+export const attachUser = (req, res, next) => {
+  if (req.session.user && req.session.user.isAuthenticated) {
+    req.user = req.session.user;
+  }
+  next();
+};
