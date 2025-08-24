@@ -22,8 +22,9 @@ app.use(cors({
   origin: [
     config.frontendUrl || 'http://localhost:3000',
     'http://localhost:3000',
-    'http://localhost:5173', // Vite dev server
-    'https://your-frontend-domain.com' // Add your production frontend URL
+    'http://localhost:5173',
+    'https://insuppent-dev.netlify.app',
+    'https://insuppent.onrender.com'
   ],
   credentials: true, // Essential for session cookies
   optionsSuccessStatus: 200,
