@@ -1,5 +1,6 @@
 import { parsePayload } from '../../../helpers/parsePayload.js';
 import { Lead } from './lead.model.js';
+import { generatePersonalizedEmails } from '../../../utils/openai.js';
 // import { getStateFromZipCode } from '../../../helpers/zipCodeHelper.js';
 import { LEAD_MESSAGES } from '../../../enums/messages.js';
 import ApiError from '../../../errors/ApiError.js';
@@ -10,19 +11,13 @@ import { calculateLeadPrice } from '../../../utils/leadPricing.js';
 const processWebhookData = async payload => {
   const body = parsePayload(payload);
 
-  //TODO: Uncomment when zip code processing is needed
-  // //find state from zip code
-  // const zipCode = body['Zip Code']?.trim();
-  // const state = getStateFromZipCode(zipCode);
-
   const leadData = {
     zipCode: body['Zip Code']?.trim(),
     state: body['State']?.trim(),
     name: `${body['First Name']?.trim()} ${body['Last Name']?.trim()}`.trim(),
     email: body['Email']?.toLowerCase().trim(),
-    phone: body['Phone']?.replace(/\D/g, ''), // Remove non-numeric characters
+    phone: body['Phone']?.replace(/\D/g, ''),
     address: (body['Street Address'] || body['Full Street Address'])?.trim(),
-    //assign lead type based on form name
     type: (() => {
       const formName = body['form_name']?.toLowerCase().trim();
       if (formName?.includes('auto')) return 'auto';
@@ -32,6 +27,16 @@ const processWebhookData = async payload => {
     })(),
   };
 
+  // Generate emails using OpenAI
+  let emails = [];
+  try {
+    emails = await generatePersonalizedEmails(leadData);
+    console.log('Generated Emails:', emails);
+  } catch (e) {
+    emails = [];
+    // Optionally log error
+  }
+  leadData.emails = emails;
   return await Lead.create(leadData);
 };
 

@@ -47,7 +47,7 @@ export async function initializeDatabase() {
 
   await sequelize.authenticate();
   // --- REMOVE THIS BLOCK AFTER TABLES ARE CREATED IN PRODUCTION ---
-  await sequelize.sync();
+  await sequelize.sync({ alter: true });
   // --------------------------------------------------------------
   initialized = true;
 }
