@@ -1,4 +1,5 @@
 import nodemailer from 'nodemailer';
+import emailTemplate from './leadInfoEmailTemplate.js';
 
 const transporter = nodemailer.createTransport({
   host: 'mail.insuppent.com',
@@ -10,7 +11,6 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-
 export const sendMail = async ({ to, subject, text, html }) => {
   const mailOptions = {
     from: 'leads@insuppent.com',
@@ -20,4 +20,13 @@ export const sendMail = async ({ to, subject, text, html }) => {
     ...(html && { html }),
   };
   return transporter.sendMail(mailOptions);
-}
+};
+
+// Helper to send lead info mail
+export const sendLeadInfoMail = async (to, leadData) => {
+  return sendMail({
+    to,
+    subject: 'Purchase Confirmation - Lead Details',
+    html: emailTemplate(leadData),
+  });
+};
