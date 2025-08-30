@@ -1,6 +1,7 @@
 import axios from 'axios';
 import config from '../../../config/index.js';
 import { mapRoles } from './sso.service.js';
+import { UserService } from '../user/user.service.js';
 
 const WP_OAUTH_AUTHORIZE = config.wpOauthAuthorize;
 const WP_OAUTH_TOKEN = config.wpOauthToken;
@@ -12,7 +13,6 @@ const REDIRECT_URI = config.wpRedirectUri;
 export function login(req, res) {
   const state = Math.random().toString(36).substring(2);
   req.session.oauthState = state;
-  console.log(`SSO login state: ${req.session.oauthState}`);
 
   const url = `${WP_OAUTH_AUTHORIZE}?response_type=code&client_id=${encodeURIComponent(CLIENT_ID)}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&state=${state}&scope=profile email`;
   res.redirect(url);
@@ -20,7 +20,6 @@ export function login(req, res) {
 
 export async function callback(req, res) {
   const { code, state } = req.query;
-  console.log(`SSO callback state: ${state}, session state: ${req.session.oauthState}`);
 
   if (!code || !state || state !== req.session.oauthState) {
     console.error('Invalid state or code in SSO callback');
@@ -46,35 +45,55 @@ export async function callback(req, res) {
       throw new Error('No access token received from WordPress');
     }
 
+
     // Get user information
     let userRes;
     try {
       userRes = await axios.get(WP_OAUTH_ME, {
-        headers: { Authorization: `Bearer ${access_token}` }
+        headers: { Host: 'insuppent.com', Authorization: `Bearer ${access_token}` }
       });
       console.log('WP User Data:', userRes.data);
     } catch (userErr) {
       console.error('User info error:', userErr.response?.data || userErr.message);
       throw new Error('Failed to fetch user information from WordPress');
     }
-
     const wpUser = userRes.data;
 
-    // Get user roles (fix for undefined roles)
-    let userRoles = [];
-    if (wpUser.roles && Array.isArray(wpUser.roles)) {
-      userRoles = wpUser.roles;
-    } else if (wpUser.roles && typeof wpUser.roles === 'object') {
-      userRoles = Object.values(wpUser.roles);
-    } else {
-      // Default role if no roles found
-      userRoles = ['subscriber'];
+    // Fetch WooCommerce Memberships for the user using API keys
+    let memberships = [];
+    try {
+      const wcMembershipsRes = await axios.get(
+        `${config.wpBaseUrl}/wp-json/wc/v2/memberships/members?customer=${wpUser.id || wpUser.ID}`,
+        {
+          auth: {
+            username: config.woocommerce.consumerKey,
+            password: config.woocommerce.consumerSecret
+          }
+        }
+      );
+      memberships = wcMembershipsRes.data;
+      console.log('WooCommerce Memberships:', memberships);
+    } catch (membershipErr) {
+      console.error('Membership fetch error:', membershipErr.response?.data || membershipErr.message);
     }
-
-    const mappedRoles = mapRoles(userRoles);
 
     // Calculate token expiry
     const tokenExpiry = new Date(Date.now() + (expires_in * 1000));
+
+    // Create user in DB if not exists
+    try {
+      await UserService.createUser({
+        name: wpUser.display_name || wpUser.username || wpUser.email,
+        email: wpUser.email,
+        status: 'active',
+        subscription: memberships && memberships.length > 0 ? memberships[0].plan_name : null,
+      });
+    } catch (err) {
+      // Ignore duplicate email error, log others
+      if (!String(err).includes('Email already exists')) {
+        console.error('User DB create error:', err);
+      }
+    }
 
     // Store comprehensive user session
     req.session.user = {
@@ -84,8 +103,7 @@ export async function callback(req, res) {
       firstName: wpUser.first_name || '',
       lastName: wpUser.last_name || '',
       displayName: wpUser.display_name || wpUser.username,
-      roles: mappedRoles,
-      wpRoles: userRoles,
+      memberships: memberships,
       accessToken: access_token,
       refreshToken: refresh_token,
       tokenExpiry: tokenExpiry,
@@ -93,15 +111,8 @@ export async function callback(req, res) {
       loginTime: new Date(),
       lastActivity: new Date()
     };
-
     // Clear OAuth state
     delete req.session.oauthState;
-
-    console.log('Session user saved:', {
-      id: req.session.user.id,
-      username: req.session.user.username,
-      roles: req.session.user.roles
-    });
 
     // Save session and redirect
     req.session.save((err) => {
@@ -110,12 +121,7 @@ export async function callback(req, res) {
         return res.redirect(`${config.frontendUrl}/auth/login?error=session_error`);
       }
 
-      // Redirect based on user role
-      const redirectUrl = mappedRoles.includes('admin')
-        ? `${config.frontendUrl}/admin`
-        : `${config.frontendUrl}/`;
-
-      res.redirect(redirectUrl);
+      res.redirect(config.frontendUrl);
     });
 
   } catch (err) {

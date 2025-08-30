@@ -1,7 +1,6 @@
 import { DataTypes, Model } from 'sequelize';
 import { sequelize } from '../../../db/sequelize.js';
 
-import { LeadUser } from '../purchase/leadUser.model.js';
 export class User extends Model {}
 
 User.init(
@@ -20,12 +19,21 @@ User.init(
       allowNull: false,
       unique: true,
     },
-    status: {
-      type: DataTypes.ENUM('active', 'inactive'),
-      allowNull: false,
-      defaultValue: 'active',
-    },
     subscription: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    purchased: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      defaultValue: 0,
+    },
+    refunded: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      defaultValue: 0,
+    },
+    status: {
       type: DataTypes.STRING,
       allowNull: true,
     },
@@ -41,6 +49,3 @@ User.init(
     timestamps: true,
   },
 );
-
-// Association for purchase history
-User.hasMany(LeadUser, { foreignKey: 'userId' });

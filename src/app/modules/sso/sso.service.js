@@ -1,5 +1,6 @@
 // SSO service: Role mapping and helpers
 export function mapRoles(wpRoles) {
+  console.log('Mapping roles:', wpRoles);
   if (!Array.isArray(wpRoles)) {
     if (!wpRoles) return ['user']; // Default role
     if (typeof wpRoles === 'string') wpRoles = [wpRoles];
@@ -10,6 +11,7 @@ export function mapRoles(wpRoles) {
   return wpRoles.map(role => {
     switch (role.toLowerCase()) {
       case 'administrator':
+        return 'admin';
       case 'admin':
         return 'admin';
       case 'subscriber':
