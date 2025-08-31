@@ -24,6 +24,15 @@ export const LeadUser = sequelize.define('LeadUser', {
     type: DataTypes.STRING,
     allowNull: false,
   },
+  leadStatus: {
+    type: DataTypes.ENUM('Purchased', 'Contacted', 'In Discussion', 'No Response', 'Sold'),
+    allowNull: false,
+    defaultValue: 'Purchased',
+  },
+  comment: {
+    type: DataTypes.TEXT,
+    allowNull: true,
+  },
 }, {
   indexes: [
     { unique: true, fields: ['userId', 'leadId'] },

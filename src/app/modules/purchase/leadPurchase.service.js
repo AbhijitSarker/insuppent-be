@@ -70,10 +70,30 @@ export async function getMyLeads(userId) {
     order: [['purchasedAt', 'DESC']],
   });
   // Flatten to just lead data, but include purchase info
-  return leadUsers.map(lu => ({
+  const flattened = leadUsers.map(lu => ({
     ...lu.Lead?.toJSON?.(),
     datePurchased: lu.purchasedAt,
-    price: undefined, // Optionally add price if you store it
-    status: 'active', // Or derive from your business logic
+    leadStatus: lu.leadStatus,
+    comment: lu.comment,
   }));
+  return flattened;
+}
+
+// Update status for a purchased lead
+export async function updateLeadStatus({ userId, leadId, status }) {
+  const leadUser = await LeadUser.findOne({ where: { userId, leadId } });
+
+  if (!leadUser) throw new ApiError(404, 'Purchased lead not found');
+  leadUser.leadStatus = status;
+  await leadUser.save();
+  return leadUser;
+}
+
+// Upsert comment for a purchased lead
+export async function upsertLeadComment({ userId, leadId, comment }) {
+  const leadUser = await LeadUser.findOne({ where: { userId, leadId } });
+  if (!leadUser) throw new ApiError(404, 'Purchased lead not found');
+  leadUser.comment = comment;
+  await leadUser.save();
+  return leadUser;
 }
