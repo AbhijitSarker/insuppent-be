@@ -126,11 +126,22 @@ const updateAdminProfile = async (id, payload) => {
 export async function markLeadUserRefunded(leadUserId, isRefunded) {
   const leadUser = await LeadUser.findByPk(leadUserId);
   if (!leadUser) throw new ApiError(404, 'LeadUser not found');
-  // Only update if value is different
-  // if (leadUser.isRefunded !== isRefunded) {
-    leadUser.isRefunded = !leadUser.isRefunded;
-    await leadUser.save();
-  // }
+
+  // Find the associated user
+  const { User } = await import('../user/user.model.js');
+  const user = await User.findByPk(leadUser.userId);
+  
+  leadUser.isRefunded = !leadUser.isRefunded;
+  if (user) {
+    if (leadUser.isRefunded) {
+      user.refunded = (user.refunded || 0) + 1;
+    } else {
+      user.refunded = Math.max((user.refunded || 1) - 1, 0);
+    }
+    await user.save();
+  }
+  
+  await leadUser.save();
   return leadUser;
 }
 
