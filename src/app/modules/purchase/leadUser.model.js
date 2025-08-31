@@ -33,6 +33,11 @@ export const LeadUser = sequelize.define('LeadUser', {
     type: DataTypes.TEXT,
     allowNull: true,
   },
+  isRefunded: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+    defaultValue: false,
+  },
 }, {
   indexes: [
     { unique: true, fields: ['userId', 'leadId'] },

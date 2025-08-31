@@ -1,3 +1,4 @@
+// Mark LeadUser as refunded
 import express from 'express';
 import { AdminController } from './admin.controller.js';
 import validateRequest from '../../middlewares/validateRequest.js';
@@ -35,5 +36,6 @@ router.patch(
   validateRequest(adminValidation.updateAdmin),
   AdminController.updateAdminProfile,
 );
+router.patch('/lead-user/:id/refund', AdminController.markLeadUserRefundedController);
 
 export const AdminRoutes = router;

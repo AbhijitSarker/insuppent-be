@@ -1,7 +1,9 @@
+
 import httpStatus from 'http-status';
 import catchAsync from '../../../shared/catchAsync.js';
 import sendResponse from '../../../shared/sendResponse.js';
-import { AdminService } from './admin.service.js';
+import { AdminService, markLeadUserRefunded } from './admin.service.js';
+
 import config from '../../../config/index.js';
 
 const createAdmin = catchAsync(async (req, res) => {
@@ -68,10 +70,24 @@ const updateAdminProfile = catchAsync(async (req, res) => {
   });
 });
 
+// PATCH /admin/lead-user/:id/refund
+const markLeadUserRefundedController = catchAsync(async (req, res) => {
+  const { id } = req.params;
+  const { isRefunded } = req.body;
+  const result = await markLeadUserRefunded(id, isRefunded);
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: `LeadUser marked as ${result.isRefunded ? 'Refunded' : 'Not Refunded'}`,
+    data: result,
+  });
+});
+
 export const AdminController = {
   createAdmin,
   loginAdmin,
   refreshToken,
   getAdminProfile,
   updateAdminProfile,
+  markLeadUserRefundedController,
 };

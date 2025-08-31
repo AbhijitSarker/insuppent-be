@@ -59,8 +59,28 @@ export const stripeWebhook = async (req, res, next) => {
     const userId = session.metadata.userId;
     const leadIds = session.metadata.leadIds.split(',').map(Number);
     await recordLeadPurchases({ userId, leadIds, stripeSessionId: session.id });
+    // Update user's purchased count
+    try {
+      const { updateUserPurchasedCount } = await import('./leadPurchase.service.js');
+      await updateUserPurchasedCount(userId, leadIds.length);
+    } catch (err) {
+      console.error('Failed to update user purchased count:', err);
+    }
   }
   res.json({ received: true });
+};
+
+// GET /purchase/user/:userId/leads
+export const getUserPurchasedLeadsController = async (req, res, next) => {
+  try {
+    const userId = req.params.userId;
+    const { status } = req.query;
+    const { getUserPurchasedLeads } = await import('./leadPurchase.service.js');
+    const leads = await getUserPurchasedLeads(userId, status);
+    res.json({ data: leads });
+  } catch (err) {
+    next(err);
+  }
 };
 
 export const getPurchaseHistory = async (req, res, next) => {

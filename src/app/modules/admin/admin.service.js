@@ -3,6 +3,7 @@ import { Admin } from './admin.model.js';
 import ApiError from '../../../errors/ApiError.js';
 import { jwtHelpers } from '../../../helpers/jwtHelpers.js';
 import config from '../../../config/index.js';
+import { LeadUser } from '../purchase/leadUser.model.js';
 
 const createAdmin = async payload => {
   // Check if admin with email already exists
@@ -121,6 +122,17 @@ const updateAdminProfile = async (id, payload) => {
   const result = await Admin.findByPk(id);
   return result;
 };
+
+export async function markLeadUserRefunded(leadUserId, isRefunded) {
+  const leadUser = await LeadUser.findByPk(leadUserId);
+  if (!leadUser) throw new ApiError(404, 'LeadUser not found');
+  // Only update if value is different
+  // if (leadUser.isRefunded !== isRefunded) {
+    leadUser.isRefunded = !leadUser.isRefunded;
+    await leadUser.save();
+  // }
+  return leadUser;
+}
 
 export const AdminService = {
   createAdmin,

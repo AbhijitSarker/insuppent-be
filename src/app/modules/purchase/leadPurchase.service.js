@@ -1,5 +1,6 @@
 import { Lead } from '../lead/lead.model.js';
 import { LeadUser } from './leadUser.model.js';
+import { User } from '../user/user.model.js';
 import { calculateLeadPrice } from '../../../utils/leadPricing.js';
 import ApiError from '../../../errors/ApiError.js';
 
@@ -96,4 +97,39 @@ export async function upsertLeadComment({ userId, leadId, comment }) {
   leadUser.comment = comment;
   await leadUser.save();
   return leadUser;
+}
+
+// Update user's purchased count
+export async function updateUserPurchasedCount(userId, count) {
+  const user = await User.findByPk(userId);
+  if (!user) throw new ApiError(404, 'User not found');
+  user.purchased += count;
+  await user.save();
+  return user;
+}
+
+// Get purchased leads for a specific user
+export async function getUserPurchasedLeads(userId, status) {
+  if (!LeadUser.associations || !LeadUser.associations.Lead) {
+    LeadUser.belongsTo(Lead, { foreignKey: 'leadId' });
+  }
+  const leadUsers = await LeadUser.findAll({
+    where: { userId },
+    include: [{ model: Lead }],
+    order: [['purchasedAt', 'DESC']],
+  });
+
+    return leadUsers.map(lu => {
+      const leadData = lu.Lead?.toJSON?.() || {};
+      const { id: leadId, ...restLeadData } = leadData;
+      return {
+        id: lu.id, // LeadUser row id
+        leadId, // Lead model id
+        ...restLeadData,
+        datePurchased: lu.purchasedAt,
+        leadStatus: lu.leadStatus,
+        comment: lu.comment,
+        isRefunded: lu.isRefunded,
+      };
+    });
 }

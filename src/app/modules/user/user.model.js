@@ -35,7 +35,9 @@ User.init(
     },
     status: {
       type: DataTypes.STRING,
+      enum: ['Active', 'Inactive'],
       allowNull: true,
+      defaultValue: 'Active',
     },
     avatar: {
       type: DataTypes.STRING,

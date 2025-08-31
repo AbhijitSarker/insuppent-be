@@ -1,8 +1,8 @@
-
 import express from 'express';
 import { createCheckoutSession, stripeWebhook, getPurchaseHistory, getMyLeadsController, updateLeadStatusController, upsertLeadCommentController } from './leadPurchase.controller.js';
 import sessionMiddleware from '../../middlewares/session.js';
 import { attachUser } from '../../middlewares/auth.js';
+import { getUserPurchasedLeadsController } from './leadPurchase.controller.js';
 
 const router = express.Router();
 
@@ -18,5 +18,6 @@ router.get('/history', getPurchaseHistory);
 router.get('/my-leads', getMyLeadsController);
 router.patch('/:leadId/status', updateLeadStatusController);
 router.patch('/:leadId/comment', upsertLeadCommentController);
+router.get('/user/:userId/leads', getUserPurchasedLeadsController);
 
 export default router;
