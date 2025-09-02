@@ -1,6 +1,8 @@
 import { parsePayload } from '../../../helpers/parsePayload.js';
 import { Lead } from './lead.model.js';
+import LeadMembershipMaxSaleCount from './leadTypeMaxSaleCount.model.js';
 import { generatePersonalizedEmails } from '../../../utils/openai.js';
+import { LeadUser } from '../purchase/leadUser.model.js';
 // import { getStateFromZipCode } from '../../../helpers/zipCodeHelper.js';
 import { LEAD_MESSAGES } from '../../../enums/messages.js';
 import ApiError from '../../../errors/ApiError.js';
@@ -55,19 +57,44 @@ const getAllLeads = async () => {
   return result;
 };
 
-const findLeads = async (memberLevelFromUser = 'subscriber') => {
-  const result = await Lead.findAll({ where: { status: 'public' } });
-  const maskedResult = result.map(lead => {
+const findLeads = async (memberLevelFromUser = 'subscriber', userId = null) => {
+  // Exclude leads already purchased by the user
+  let excludeLeadIds = [];
+  // if (userId) {
+    const purchasedLeads = await LeadUser.findAll({
+      where: { userId:2 },
+      attributes: ['leadId'],
+      raw: true,
+    });
+    excludeLeadIds = purchasedLeads.map(lu => lu.leadId);
+  // }
+//todo
+  // Fetch maxLeadSaleCount for this membership
+  const membership = memberLevelFromUser || 'subscriber';
+  let maxLeadSaleCount = 50;
+  const membershipConfig = await LeadMembershipMaxSaleCount.findOne({ where: { membership: 'subscriber' } });
+  if (membershipConfig) maxLeadSaleCount = membershipConfig.maxLeadSaleCount;
+  console.log(`Membership: ${membershipConfig.maxLeadSaleCount}, Max Lead Sale Count: ${maxLeadSaleCount}`);
+  // Only return leads that are public, not purchased by user, and saleCount < maxLeadSaleCount
+  const where = {
+    status: 'public',
+    ...(excludeLeadIds.length > 0 ? { id: { [Op.notIn]: excludeLeadIds } } : {}),
+  };
+  const result = await Lead.findAll({ where });
+  // Defensive: filter again after query in case of any ORM issues
+  const filteredResult = result.filter(lead => {
+    return (!excludeLeadIds.includes(lead.id)) && (lead.saleCount < maxLeadSaleCount);
+  });
+  const maskedResult = filteredResult.map(lead => {
     const leadObj = lead.toJSON();
-    // Use memberLevel from user (middleware), fallback to 'subscriber'
-    const memberLevel = memberLevelFromUser || 'subscriber';
     const leadType = leadObj.leadType || leadObj.type || 'auto';
-    const price = calculateLeadPrice(memberLevel, leadType);
+    const price = calculateLeadPrice('subscriber', leadType);
     return {
       ...leadObj,
       email: leadObj.email.replace(/(.{2})(.*)(@.*)/, '$1***$3'),
       phone: leadObj.phone.replace(/(\d{3})(\d+)(\d{2})/, '$1****$3'),
       price,
+      maxLeadSaleCount, // include in response for frontend
     };
   });
   return maskedResult;
@@ -103,7 +130,39 @@ const updateStatus = async (id, status) => {
 
   return result;
 };
+// Bulk update maxLeadSaleCount for all leads of a given membership and update the config table
+const updateMaxLeadSaleCountByMembership = async (membership, maxLeadSaleCount) => {
+  // Update config table
+  await LeadMembershipMaxSaleCount.upsert({ membership, maxLeadSaleCount });
+  // Update all leads for this membership (if you want to update all leads, you may need to join with users or store membership info on leads)
+  // Here, we assume you want to update all leads regardless of type
+  const [affectedRows] = await Lead.update(
+    { maxLeadSaleCount },
+    { where: {} }
+  );
+  return { affectedRows };
+};
 
+// Fetch all lead membership max sale counts
+const getAllLeadMembershipMaxSaleCounts = async () => {
+  return await LeadMembershipMaxSaleCount.findAll();
+};
+
+// Fetch sale counts for all memberships (requires joining with users if you want per membership)
+const getLeadSaleCountsByMembership = async () => {
+  // Returns: [{ membership, saleCount, totalLeads }]
+  // This requires a join with users if you want to group by membership
+  // For now, just return total saleCount and totalLeads
+  const { Lead } = await import('./lead.model.js');
+  const results = await Lead.findAll({
+    attributes: [
+      [Lead.sequelize.fn('SUM', Lead.sequelize.col('saleCount')), 'saleCount'],
+      [Lead.sequelize.fn('COUNT', Lead.sequelize.col('id')), 'totalLeads'],
+    ],
+    raw: true,
+  });
+  return results;
+};
 export const LeadService = {
   processWebhookData,
   getSingleLead,
@@ -112,4 +171,7 @@ export const LeadService = {
   updateLead,
   deleteLead,
   updateStatus,
+  updateMaxLeadSaleCountByMembership,
+  getAllLeadMembershipMaxSaleCounts,
+  getLeadSaleCountsByMembership,
 };

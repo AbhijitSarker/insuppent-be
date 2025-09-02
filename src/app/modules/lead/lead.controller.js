@@ -43,7 +43,8 @@ const getAllLeads = catchAsync(async (req, res) => {
 const findLeads = catchAsync(async (req, res) => {
   // Get membership info from req.user (set by auth middleware)
   const memberLevel = req.user?.membership || req.user?.memberLevel || 'subscriber';
-  const result = await LeadService.findLeads(memberLevel);
+  const userId = req.user?.id;
+  const result = await LeadService.findLeads(memberLevel, userId);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
@@ -94,6 +95,44 @@ const updateStatus = catchAsync(async (req, res) => {
   });
 });
 
+// Bulk update maxLeadSaleCount for all leads of a given membership
+const updateMaxLeadSaleCountByMembership = catchAsync(async (req, res) => {
+  const { membership } = req.params;
+  const { maxLeadSaleCount } = req.body;
+  if (!membership || typeof maxLeadSaleCount !== 'number') {
+    return res.status(400).json({ success: false, message: 'membership and maxLeadSaleCount are required.' });
+  }
+  const result = await LeadService.updateMaxLeadSaleCountByMembership(membership, maxLeadSaleCount);
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: `maxLeadSaleCount updated for all ${membership} leads`,
+    data: result,
+  });
+});
+
+// Get all lead membership max sale counts
+const getAllLeadMembershipMaxSaleCounts = catchAsync(async (req, res) => {
+  const result = await LeadService.getAllLeadMembershipMaxSaleCounts();
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Fetched all lead membership max sale counts',
+    data: result,
+  });
+});
+
+// Get lead sale counts by membership
+const getLeadSaleCountsByMembership = catchAsync(async (req, res) => {
+  const result = await LeadService.getLeadSaleCountsByMembership();
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Fetched lead sale counts by membership',
+    data: result,
+  });
+});
+
 export const LeadController = {
   webhookHandler,
   getSingleLead,
@@ -102,4 +141,7 @@ export const LeadController = {
   updateLead,
   deleteLead,
   updateStatus,
+  updateMaxLeadSaleCountByMembership,
+  getAllLeadMembershipMaxSaleCounts,
+  getLeadSaleCountsByMembership,
 };

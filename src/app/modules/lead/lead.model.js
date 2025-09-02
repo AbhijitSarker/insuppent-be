@@ -50,11 +50,6 @@ Lead.init(
       allowNull: false,
       defaultValue: 0,
     },
-    maxLeadSaleCount: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      defaultValue: 3,
-    },
     emails: {
       type: DataTypes.JSON,
       allowNull: true,
