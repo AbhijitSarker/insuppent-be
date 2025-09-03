@@ -5,6 +5,10 @@ import ApiError from '../../../errors/ApiError.js';
 import { getLeadsForPurchase, buildLineItems, recordLeadPurchases, getUserPurchaseHistory } from './leadPurchase.service.js';
 import { createStripeSession, constructStripeEvent } from './stripe.util.js';
 
+import { User } from '../user/user.model.js';
+import { LeadService } from '../lead/lead.service.js';
+import { sendLeadInfoMail } from '../../../utils/mailSender.js';
+
 export const createCheckoutSession = async (req, res, next) => {
   console.log('createCheckoutSession called', req.user);
   try {
@@ -65,6 +69,28 @@ export const stripeWebhook = async (req, res, next) => {
       await updateUserPurchasedCount(userId, leadIds.length);
     } catch (err) {
       console.error('Failed to update user purchased count:', err);
+    }
+
+    // Send email to user with lead info for each purchased lead
+    try {
+      // Get user email
+      const user = await User.findByPk(userId);
+      if (user && user.email) {
+        for (const leadId of leadIds) {
+          // Always fetch lead from DB to ensure latest info
+          const lead = await LeadService.getSingleLead(leadId);
+          if (lead) {
+            try {
+              const mailResult = await sendLeadInfoMail(user.email, lead.toJSON());
+              console.log('Mail sent result:', mailResult && mailResult.accepted);
+            } catch (mailErr) {
+              console.error('Error sending mail for lead', leadId, mailErr);
+            }
+          }
+        }
+      }
+    } catch (err) {
+      console.error('Failed to send lead info email:', err);
     }
   }
   res.json({ received: true });
