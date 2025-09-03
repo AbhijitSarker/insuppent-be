@@ -29,7 +29,7 @@ export function buildLineItems(leads, memberLevel) {
         currency: 'usd',
         product_data: {
           name: `Lead: ${lead.name}`,
-          description: `${lead.type} - ${lead.state}`,
+          description: `Type: ${lead.type}, State: ${lead.state}`,
         },
         unit_amount: Math.round(price * 100),
       },
