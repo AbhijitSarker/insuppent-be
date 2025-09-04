@@ -9,6 +9,7 @@ import morgan from 'morgan';
 
 import sessionMiddleware from './app/middlewares/session.js';
 import config from './config/index.js';
+import settingsRoutes from './app/modules/settings/settings.routes.js';
 
 
 const app = express();
@@ -46,6 +47,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use('/api/v1', routes);
+app.use('/api/settings', settingsRoutes);
 
 // Health check endpoint
 app.get('/', async (req, res) => {

@@ -6,6 +6,7 @@ import { AdminRoutes } from '../modules/admin/admin.routes.js';
 import { UserRoutes } from '../modules/user/user.routes.js';
 
 import { SsoRoutes } from '../modules/sso/index.js';
+import { SettingsRoutes } from '../modules/settings/settings.routes.js';
 
 const router = express.Router();
 
@@ -30,6 +31,10 @@ const moduleRoutes = [
     path: '/auth',
     route: SsoRoutes,
   },
+  {
+    path: '/settings',
+    route: SettingsRoutes,
+  }
 ];
 
 moduleRoutes.forEach(route => router.use(route.path, route.route));
