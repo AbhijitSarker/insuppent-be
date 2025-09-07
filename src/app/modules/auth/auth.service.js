@@ -4,10 +4,10 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const wpBaseUrl = process.env.WP_BASE_URL || 'https://staging2.insuppent.com';
-const verifyEndpoint = `${wpBaseUrl}/wp-json/wprsb/v1/verify?uid=16&token=3HUDfA1joV4VlB1XG2GBsMfwkpc7RCfdfgBloIpp5yH`;
 
 const verifyToken = async (uid, token) => {
-  console.log(verifyEndpoint)
+  const verifyEndpoint = `${wpBaseUrl}/wp-json/wprsb/v1/verify?uid=${uid}&token=${token}`;
+
   try {
     const response = await axios.get(verifyEndpoint);
     console.log('WordPress verification response:', response.data);

@@ -22,6 +22,7 @@ const createUser = async payload => {
   }
   // Only keep allowed fields
   const userData = {
+    id: payload.userid,
     name: payload.name,
     email: payload.email,
     subscription: payload.subscription,
@@ -48,9 +49,20 @@ const getSingleUser = async id => {
   return result;
 };
 
+const getUserByEmail = async email => {
+  const user = await User.findOne({
+    where: { email }
+  });
+  if (!user) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'User not found');
+  }
+  return user;
+};
+
 export const UserService = {
   createUser,
   getAllUsers,
   getSingleUser,
   updateUserStatus,
+  getUserByEmail,
 };

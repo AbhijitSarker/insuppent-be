@@ -62,7 +62,7 @@ const findLeads = async (memberLevelFromUser = 'subscriber', userId = null) => {
   let excludeLeadIds = [];
   // if (userId) {
     const purchasedLeads = await LeadUser.findAll({
-      where: { userId:2 },
+      where: { userId: userId },
       attributes: ['leadId'],
       raw: true,
     });
@@ -71,8 +71,9 @@ const findLeads = async (memberLevelFromUser = 'subscriber', userId = null) => {
 //todo
   // Fetch maxLeadSaleCount for this membership
   const membership = memberLevelFromUser || 'subscriber';
+  console.log('Finding leads for membership:', membership, 'and userId:', userId);
   let maxLeadSaleCount = 50;
-  const membershipConfig = await LeadMembershipMaxSaleCount.findOne({ where: { membership: 'subscriber' } });
+  const membershipConfig = await LeadMembershipMaxSaleCount.findOne({ where: { membership } });
   if (membershipConfig) maxLeadSaleCount = membershipConfig.maxLeadSaleCount;
   console.log(`Membership: ${membershipConfig.maxLeadSaleCount}, Max Lead Sale Count: ${maxLeadSaleCount}`);
   // Only return leads that are public, not purchased by user, and saleCount < maxLeadSaleCount

@@ -1,9 +1,9 @@
-// app/middlewares/auth.js
 import httpStatus from 'http-status';
-import sendResponse from '../utils/sendResponse.js';
+import sendResponse from '../../shared/sendResponse.js';
 
 // Basic authentication check
 export const requireAuth = (req, res, next) => {
+    console.log('Session Data:', req.session);
     if (!req.session || !req.session.user) {
         return sendResponse(res, {
             statusCode: httpStatus.UNAUTHORIZED,

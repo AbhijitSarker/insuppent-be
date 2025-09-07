@@ -5,6 +5,7 @@ import { calculateLeadPrice } from '../../../utils/leadPricing.js';
 import ApiError from '../../../errors/ApiError.js';
 
 export async function getLeadsForPurchase(leadIds, userId) {
+  console.log('getLeadsForPurchase called with leadIds:', leadIds, 'and userId:', userId);
   const leads = await Lead.findAll({ where: { id: leadIds } });
   if (leads.length !== leadIds.length) throw new ApiError(400, 'Some leads not found');
 

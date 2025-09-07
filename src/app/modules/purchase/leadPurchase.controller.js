@@ -17,20 +17,20 @@ export const createCheckoutSession = async (req, res, next) => {
     // const userId = req.user.id;
     if (!Array.isArray(leadIds) || leadIds.length === 0) return next(new ApiError(400, 'No leads selected'));
     
-    const leads = await getLeadsForPurchase(leadIds, 2);
-    // const memberLevel = req.user.wpRoles[0] || 'subscriber';
-// console.log('Leads for Purchase:', memberLevel);
+    const leads = await getLeadsForPurchase(leadIds, req.user.userid);
+    const memberLevel = req.user.membership|| 'subscriber';
+console.log('Leads for Purchase:', memberLevel);
 
-    const line_items = buildLineItems(leads, 'subscriber');
+    const line_items = buildLineItems(leads, memberLevel);
     const session = await createStripeSession({
       payment_method_types: ['card'],
       line_items,
       mode: 'payment',
-      customer_email: 'abhijitsarker03@gmail.com',
+      customer_email: req.user.email,
       metadata: {
         // userId,
         //todo fix this
-        userId: 2,
+        userId: req.user.dbUserId,
         leadIds: leadIds.join(','),
       },
   success_url: `${config.frontendUrl || 'http://localhost:5173'}/my-leads?success=1`,
@@ -81,7 +81,7 @@ export const stripeWebhook = async (req, res, next) => {
           const lead = await LeadService.getSingleLead(leadId);
           if (lead) {
             try {
-              const mailResult = await sendLeadInfoMail(user.email, lead.toJSON());
+              const mailResult = await sendLeadInfoMail('abhijitsarker03@gmail.com', lead.toJSON());
               console.log('Mail sent result:', mailResult && mailResult.accepted);
             } catch (mailErr) {
               console.error('Error sending mail for lead', leadId, mailErr);
@@ -122,9 +122,7 @@ export const getPurchaseHistory = async (req, res, next) => {
 // GET /leads/my
 export const getMyLeadsController = async (req, res, next) => {
   try {
-    //todo fix this
-    // const userId = req.user.id;
-    const leads = await getMyLeads(2);
+    const leads = await getMyLeads(req.user.userid);
     res.json({ data: leads });
   } catch (err) {
     next(err);
@@ -134,11 +132,11 @@ export const getMyLeadsController = async (req, res, next) => {
 // PATCH /purchase/:leadId/status
 export const updateLeadStatusController = async (req, res, next) => {
   try {
-    // const userId = req.user.id;
+    const userId = req.user.userid;
     const { leadId } = req.params;
     const { status } = req.body;
-    const updated = await updateLeadStatus({ userId: 2, leadId, status });
-    console.log('updated', updated);
+    const updated = await updateLeadStatus({ userId, leadId, status });
+
     res.json({ data: updated });
   } catch (err) {
     next(err);
@@ -148,10 +146,10 @@ export const updateLeadStatusController = async (req, res, next) => {
 // PATCH /purchase/:leadId/comment
 export const upsertLeadCommentController = async (req, res, next) => {
   try {
-    // const userId = req.user.id;
+    const userId = req.user.userid;
     const { leadId } = req.params;
     const { comment } = req.body;
-    const updated = await upsertLeadComment({ userId: 2, leadId, comment });
+    const updated = await upsertLeadComment({ userId, leadId, comment });
     res.json({ data: updated });
   } catch (err) {
     next(err);

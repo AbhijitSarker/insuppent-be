@@ -41,9 +41,10 @@ const getAllLeads = catchAsync(async (req, res) => {
 });
 
 const findLeads = catchAsync(async (req, res) => {
+  console.log('User info from req:', req.user);
   // Get membership info from req.user (set by auth middleware)
   const memberLevel = req.user?.membership || req.user?.memberLevel || 'subscriber';
-  const userId = req.user?.id;
+  const userId = req.user?.userid;
   const result = await LeadService.findLeads(memberLevel, userId);
 
   sendResponse(res, {

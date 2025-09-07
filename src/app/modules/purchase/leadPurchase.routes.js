@@ -1,19 +1,15 @@
 import express from 'express';
 import { createCheckoutSession, stripeWebhook, getPurchaseHistory, getMyLeadsController, updateLeadStatusController, upsertLeadCommentController } from './leadPurchase.controller.js';
-import sessionMiddleware from '../../middlewares/session.js';
-import { attachUser } from '../../middlewares/auth.js';
 import { getUserPurchasedLeadsController } from './leadPurchase.controller.js';
+import { requireAuth } from '../../middlewares/wpAuth.js';
 
 const router = express.Router();
 
+router.post('/webhook', express.raw({ type: 'application/json' }), stripeWebhook);
 
-// Apply session middleware to all purchase routes
-router.use(sessionMiddleware);
-router.use(attachUser)
-
+router.use(requireAuth)
 
 router.post('/checkout', createCheckoutSession);
-router.post('/webhook', express.raw({ type: 'application/json' }), stripeWebhook);
 router.get('/history', getPurchaseHistory);
 router.get('/my-leads', getMyLeadsController);
 router.patch('/:leadId/status', updateLeadStatusController);

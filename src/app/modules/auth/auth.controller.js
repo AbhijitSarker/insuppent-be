@@ -3,6 +3,7 @@ import httpStatus from 'http-status';
 import catchAsync from '../../../shared/catchAsync.js';
 import sendResponse from '../../../shared/sendResponse.js';
 import { verifyToken, refreshUserData } from './auth.service.js';
+import { UserService } from '../user/user.service.js';
 
 const verifyWordPressAuth = catchAsync(async (req, res) => {
     const { uid, token } = req.query;
@@ -26,21 +27,59 @@ const verifyWordPressAuth = catchAsync(async (req, res) => {
         });
     }
 
-    // Store user data in session
-    req.session.user = {
-        ...verificationResult.user,
-        uid,
-        token,
-        authenticatedAt: new Date().toISOString(),
-    };
+    // Try to create or update user in our database
+    try {
+        const wpUser = verificationResult.user;
+        console.log('Verified WP User:', wpUser);
+        const userData = {
+            userid: wpUser.userid,
+            name: wpUser.name || wpUser.display_name,
+            email: wpUser.email,
+            subscription: wpUser.membership || 'Subscriber',
+            status: 'Active',
+            avatar: wpUser.avatar_url,
+        };
 
-    // Save session
-    await new Promise((resolve, reject) => {
-        req.session.save((err) => {
-            if (err) reject(err);
-            else resolve();
+        // Try to create user, if exists it will throw an error
+        let dbUser = null;
+        try {
+            dbUser = await UserService.createUser(userData);
+            console.log('New user created:', dbUser);
+        } catch (error) {
+            if (error.statusCode === httpStatus.BAD_REQUEST && error.message === 'Email already exists') {
+                // User exists, get their details
+                const existingUser = await UserService.getUserByEmail(userData.email);
+                dbUser = existingUser;
+                console.log('Existing user found:', dbUser);
+            } else {
+                throw error;
+            }
+        }
+
+        // Store user data in session
+        req.session.user = {
+            ...verificationResult.user,
+            uid,
+            token,
+            authenticatedAt: new Date().toISOString(),
+            dbUserId: dbUser.id // Store our database user ID in the session
+        };
+
+        // Save session
+        await new Promise((resolve, reject) => {
+            req.session.save((err) => {
+                if (err) reject(err);
+                else resolve();
+            });
         });
-    });
+    } catch (error) {
+        console.error('Error creating/updating user:', error);
+        return sendResponse(res, {
+            statusCode: httpStatus.INTERNAL_SERVER_ERROR,
+            success: false,
+            message: 'Error creating user account',
+        });
+    }
 
     sendResponse(res, {
         statusCode: httpStatus.OK,
