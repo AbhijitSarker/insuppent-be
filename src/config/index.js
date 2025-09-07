@@ -35,9 +35,11 @@ export default {
   wpClientId: process.env.WP_CLIENT_ID,
   wpClientSecret: process.env.WP_CLIENT_SECRET,
   wpRedirectUri: process.env.WP_REDIRECT_URI,
-  wpBaseUrl: process.env.WP_BASE_URL, 
   woocommerce: {
     consumerKey: process.env.WOOCOMMERCE_CONSUMER_KEY,
     consumerSecret: process.env.WOOCOMMERCE_CONSUMER_SECRET,
   },
+
+  wpBaseUrl: process.env.WP_BASE_URL || 'https://staging2.insuppent.com',
+  wpLoginUrl: process.env.WP_LOGIN_URL || 'https://staging2.insuppent.com/wp-login.php',
 };

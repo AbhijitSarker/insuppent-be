@@ -5,7 +5,7 @@ import purchaseRoutes from '../modules/purchase/leadPurchase.routes.js';
 import { AdminRoutes } from '../modules/admin/admin.routes.js';
 import { UserRoutes } from '../modules/user/user.routes.js';
 
-import { SsoRoutes } from '../modules/sso/index.js';
+import AuthRoutes from '../modules/auth/auth.routes.js';
 import { SettingsRoutes } from '../modules/settings/settings.routes.js';
 
 const router = express.Router();
@@ -29,7 +29,7 @@ const moduleRoutes = [
   },
   {
     path: '/auth',
-    route: SsoRoutes,
+    route: AuthRoutes,
   },
   {
     path: '/settings',
