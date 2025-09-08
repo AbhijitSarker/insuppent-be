@@ -33,12 +33,12 @@ export const sendLeadInfoMail = async (to, leadData) => {
 };
 
 // Helper to send admin purchase notification
-export const sendAdminPurchaseNotification = async purchaseData => {
+export const sendAdminPurchaseNotification = async (purchaseData) => {
   const adminEmail = process.env.ADMIN_EMAIL || 'abhijitsarker03@gmail.com';
-
+  
   return sendMail({
     to: adminEmail,
-    subject: `New Lead Purchase - Order #${purchaseData.sessionId}`,
+    subject: `Payment received – ${purchaseData.user.name} purchased a lead`,
     html: adminPurchaseNotificationTemplate(purchaseData),
   });
 };

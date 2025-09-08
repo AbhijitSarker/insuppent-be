@@ -3,24 +3,18 @@
  * @param {Object} data - Purchase data
  * @returns {string} HTML email template
  */
-const adminPurchaseNotificationTemplate = (data) => {
+const adminPurchaseNotificationTemplate = data => {
   const { user, leads, sessionId, purchaseDate } = data;
-  
-  // Create lead items HTML
-  const leadItems = leads.map(lead => `
-    <tr>
-      <td style="padding: 8px; border: 1px solid #ddd;">${lead.id}</td>
-      <td style="padding: 8px; border: 1px solid #ddd;">${lead.firstName || ''} ${lead.lastName || ''}</td>
-      <td style="padding: 8px; border: 1px solid #ddd;">${lead.businessName || 'N/A'}</td>
-      <td style="padding: 8px; border: 1px solid #ddd;">${lead.email || 'N/A'}</td>
-      <td style="padding: 8px; border: 1px solid #ddd;">${lead.phoneNumber || 'N/A'}</td>
-      <td style="padding: 8px; border: 1px solid #ddd;">$${lead.price?.toFixed(2) || '0.00'}</td>
-    </tr>
-  `).join('');
-  
+
+  // For simplicity, focus on the first lead if multiple leads were purchased
+  const lead = leads.length > 0 ? leads[0] : { id: 'N/A', price: 0 };
+
   // Calculate total amount
-  const totalAmount = leads.reduce((total, lead) => total + (lead.price || 0), 0);
-  
+  const totalAmount = leads.reduce(
+    (total, lead) => total + (lead.price || 0),
+    0,
+  );
+
   return `
     <!DOCTYPE html>
     <html lang="en">
@@ -37,7 +31,7 @@ const adminPurchaseNotificationTemplate = (data) => {
           background-color: #f5f5f5;
         }
         .container {
-          max-width: 800px;
+          max-width: 600px;
           margin: 0 auto;
           padding: 20px;
           background-color: #fff;
@@ -55,34 +49,34 @@ const adminPurchaseNotificationTemplate = (data) => {
         }
         .content {
           padding: 20px;
+          text-align: center;
         }
         .content p {
           margin: 0 0 15px;
           color: #333;
         }
-        .summary {
+        .payment-details {
           background-color: #f9f9f9;
           padding: 15px;
           border-radius: 5px;
           margin: 20px 0;
-        }
-        table {
-          width: 100%;
-          border-collapse: collapse;
-          margin: 20px 0;
-        }
-        th, td {
-          padding: 8px;
-          border: 1px solid #ddd;
           text-align: left;
         }
-        th {
-          background-color: #f2f2f2;
-          font-weight: bold;
+        .payment-details h3 {
+          color: #6f4e37;
+          margin-top: 0;
         }
-        tfoot td {
+        .payment-details p {
+          margin: 10px 0;
+        }
+        .confirm-button {
+          display: inline-block;
+          padding: 10px 20px;
+          background-color: #6f4e37;
+          color: #fff;
+          text-decoration: none;
+          border-radius: 5px;
           font-weight: bold;
-          background-color: #f9f9f9;
         }
         .footer {
           text-align: center;
@@ -104,47 +98,24 @@ const adminPurchaseNotificationTemplate = (data) => {
           <h1 style="font-size: 28px; color: #6f4e37;">Insuppent</h1>
         </div>
         <div class="header">
-          <h2>New Lead Purchase Notification</h2>
+          <h2>Payment Received</h2>
         </div>
         <div class="content">
-          <p>A new purchase has been made on the Insuppent platform.</p>
+          <p>A new payment has been received successfully.</p>
           
-          <div class="summary">
-            <h3>Purchase Summary:</h3>
-            <p><strong>Purchase ID:</strong> ${sessionId}</p>
+          <div class="payment-details">
+            <h3>Payment details</h3>
+            <p><strong>User:</strong> ${user.name || 'N/A'} (${user.email || 'N/A'})</p>
+            ${
+              leads.length === 1
+                ? `<p><strong>Lead ID:</strong> ${lead.id}</p>`
+                : `<p><strong>Lead IDs:</strong> ${leads.map(l => l.id).join(', ')}</p>`
+            }
+            <p><strong>Amount:</strong> $${totalAmount.toFixed(2)}</p>
             <p><strong>Date:</strong> ${purchaseDate}</p>
-            <p><strong>Total Amount:</strong> $${totalAmount.toFixed(2)}</p>
-            <p><strong>Number of Leads:</strong> ${leads.length}</p>
           </div>
           
-          <h3>Customer Information:</h3>
-          <p><strong>Name:</strong> ${user.name || 'N/A'}</p>
-          <p><strong>Email:</strong> ${user.email || 'N/A'}</p>
-          <p><strong>User ID:</strong> ${user.id}</p>
-          <p><strong>Membership Level:</strong> ${user.membership || 'N/A'}</p>
-          
-          <h3>Purchased Leads:</h3>
-          <table>
-            <thead>
-              <tr>
-                <th>Lead ID</th>
-                <th>Name</th>
-                <th>Business</th>
-                <th>Email</th>
-                <th>Phone</th>
-                <th>Price</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${leadItems}
-            </tbody>
-            <tfoot>
-              <tr>
-                <td colspan="5" style="text-align: right;"><strong>Total:</strong></td>
-                <td><strong>$${totalAmount.toFixed(2)}</strong></td>
-              </tr>
-            </tfoot>
-          </table>
+          ${leads.length > 1 ? `<p><em>Note: This payment includes ${leads.length} leads.</em></p>` : ''}
           
           <p>Thank you,</p>
           <p>The Insuppent Team</p>
