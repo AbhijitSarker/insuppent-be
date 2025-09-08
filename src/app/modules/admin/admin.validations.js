@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export const adminValidation = {
+export const AdminValidation = {
   createAdmin: z.object({
     body: z.object({
       name: z.string({
@@ -21,6 +21,40 @@ export const adminValidation = {
     }),
   }),
 
+  loginAdmin: z.object({
+    body: z.object({
+      email: z
+        .string({
+          required_error: 'Email is required',
+        })
+        .email('Invalid email format'),
+      password: z
+        .string({
+          required_error: 'Password is required',
+        })
+        .min(6, 'Password must be at least 6 characters'),
+    }),
+  }),
+
+  forgotPassword: z.object({
+    body: z.object({
+      email: z
+        .string({
+          required_error: 'Email is required',
+        })
+        .email('Invalid email format'),
+    }),
+  }),
+
+  resetPassword: z.object({
+    body: z.object({
+      password: z
+        .string({
+          required_error: 'Password is required',
+        })
+        .min(6, 'Password must be at least 6 characters'),
+    }),
+  }),
   loginAdmin: z.object({
     body: z.object({
       email: z

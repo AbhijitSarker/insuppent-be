@@ -39,6 +39,14 @@ Admin.init(
       allowNull: false,
       defaultValue: 'active',
     },
+    passwordResetToken: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    passwordResetExpires: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
   },
   {
     sequelize,
@@ -46,7 +54,7 @@ Admin.init(
     tableName: 'Admin',
     timestamps: true,
     defaultScope: {
-      attributes: { exclude: ['password'] },
+      attributes: { exclude: ['password', 'passwordResetToken', 'passwordResetExpires'] },
     },
     hooks: {
       beforeCreate: async admin => {
