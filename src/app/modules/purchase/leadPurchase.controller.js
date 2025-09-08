@@ -7,7 +7,7 @@ import { createStripeSession, constructStripeEvent } from './stripe.util.js';
 
 import { User } from '../user/user.model.js';
 import { LeadService } from '../lead/lead.service.js';
-import { sendLeadInfoMail } from '../../../utils/mailSender.js';
+import { sendLeadInfoMail, sendAdminPurchaseNotification } from '../../../utils/mailSender.js';
 
 export const createCheckoutSession = async (req, res, next) => {
   console.log('createCheckoutSession called', req.user);
@@ -76,17 +76,41 @@ export const stripeWebhook = async (req, res, next) => {
       // Get user email
       const user = await User.findByPk(userId);
       if (user && user.email) {
+        const purchasedLeads = [];
+        
         for (const leadId of leadIds) {
           // Always fetch lead from DB to ensure latest info
           const lead = await LeadService.getSingleLead(leadId);
           if (lead) {
+            purchasedLeads.push(lead.toJSON());
             try {
-              const mailResult = await sendLeadInfoMail('abhijitsarker03@gmail.com', lead.toJSON());
+              const mailResult = await sendLeadInfoMail(user.email, lead.toJSON());
               console.log('Mail sent result:', mailResult && mailResult.accepted);
             } catch (mailErr) {
               console.error('Error sending mail for lead', leadId, mailErr);
             }
           }
+        }
+        
+        // Send admin notification email
+        try {
+          const purchaseDate = new Date().toLocaleString();
+          const purchaseData = {
+            user: {
+              id: user.id,
+              name: user.name,
+              email: user.email,
+              membership: user.membership || 'subscriber'
+            },
+            leads: purchasedLeads,
+            sessionId: session.id,
+            purchaseDate
+          };
+          
+          const adminMailResult = await sendAdminPurchaseNotification(purchaseData);
+          console.log('Admin notification mail sent result:', adminMailResult && adminMailResult.accepted);
+        } catch (adminMailErr) {
+          console.error('Error sending admin notification email:', adminMailErr);
         }
       }
     } catch (err) {

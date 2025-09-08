@@ -1,5 +1,6 @@
 import nodemailer from 'nodemailer';
 import emailTemplate from './leadInfoEmailTemplate.js';
+import adminPurchaseNotificationTemplate from './adminPurchaseNotificationTemplate.js';
 
 const transporter = nodemailer.createTransport({
   host: 'mail.insuppent.com',
@@ -28,5 +29,16 @@ export const sendLeadInfoMail = async (to, leadData) => {
     to,
     subject: 'Purchase Confirmation - Lead Details',
     html: emailTemplate(leadData),
+  });
+};
+
+// Helper to send admin purchase notification
+export const sendAdminPurchaseNotification = async purchaseData => {
+  const adminEmail = process.env.ADMIN_EMAIL || 'abhijitsarker03@gmail.com';
+
+  return sendMail({
+    to: adminEmail,
+    subject: `New Lead Purchase - Order #${purchaseData.sessionId}`,
+    html: adminPurchaseNotificationTemplate(purchaseData),
   });
 };
