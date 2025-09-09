@@ -4,16 +4,16 @@
  * @returns {string} HTML email template
  */
 const adminPurchaseNotificationTemplate = data => {
-  const { user, leads, sessionId, purchaseDate } = data;
+  const { user, leads, sessionId, purchaseDate, totalAmount } = data;
 
   // For simplicity, focus on the first lead if multiple leads were purchased
   const lead = leads.length > 0 ? leads[0] : { id: 'N/A', price: 0 };
 
-  // Calculate total amount
-  const totalAmount = leads.reduce(
-    (total, lead) => total + (lead.price || 0),
-    0,
-  );
+  // // Calculate total amount
+  // const totalAmount = leads.reduce(
+  //   (total, lead) => total + (lead.price || 0),
+  //   0,
+  // );
 
   return `
     <!DOCTYPE html>
@@ -121,10 +121,6 @@ const adminPurchaseNotificationTemplate = data => {
           <p>The Insuppent Team</p>
         </div>
         <div class="footer">
-          <a href="#"><img src="https://via.placeholder.com/24" alt="YouTube" style="vertical-align: middle;"></a>
-          <a href="#"><img src="https://via.placeholder.com/24" alt="LinkedIn" style="vertical-align: middle;"></a>
-          <a href="#"><img src="https://via.placeholder.com/24" alt="Facebook" style="vertical-align: middle;"></a>
-          <a href="#"><img src="https://via.placeholder.com/24" alt="Instagram" style="vertical-align: middle;"></a>
           <p style="margin-top: 10px;">This is an automated notification from the Insuppent platform. Please do not reply to this email.</p>
         </div>
       </div>
