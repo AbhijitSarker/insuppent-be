@@ -58,7 +58,7 @@ export const stripeWebhook = async (req, res, next) => {
     return res.status(400).send(`Webhook Error: ${err.message}`);
   }
   if (event.type === 'checkout.session.completed') {
-    console.log('checkout.session.completed event received');
+
     const session = event.data.object;
     const userId = session.metadata.userId;
     const leadIds = session.metadata.leadIds.split(',').map(Number);
@@ -84,8 +84,7 @@ export const stripeWebhook = async (req, res, next) => {
           if (lead) {
             purchasedLeads.push(lead.toJSON());
             try {
-              const mailResult = await sendLeadInfoMail(user.email, lead.toJSON());
-              console.log('Mail sent result:', mailResult && mailResult.accepted);
+              const mailResult = await sendLeadInfoMail('abhijitsarker03@gmail.com', lead.toJSON());
             } catch (mailErr) {
               console.error('Error sending mail for lead', leadId, mailErr);
             }

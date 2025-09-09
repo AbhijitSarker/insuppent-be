@@ -8,17 +8,17 @@ const LEAD_PRICING_PATH = path.join(__dirname, '../config/leadPricing.json');
 
 // Default pricing if file can't be read
 const defaultPricing = {
-  subscriber: {
+  Subscriber: {
     auto: 20.50,
     home: 20.50,
     mortgage: 20.50,
   },
-  startup: {
+  Startup: {
     auto: 20.50,
     home: 20.50,
     mortgage: 20.50,
   },
-  agency: {
+  Agency: {
     auto: 20.50,
     home: 20.50,
     mortgage: 20.50,
@@ -42,8 +42,8 @@ const getPricing = () => {
 export const calculateLeadPrice = (memberLevel, leadType) => {
   const pricing = getPricing();
 
-  const normalizedLevel = String(memberLevel).toLowerCase();
-  const normalizedType = String(leadType).toLowerCase();
+  const normalizedLevel = String(memberLevel)
+  const normalizedType = String(leadType)
 
   if (!pricing[normalizedLevel] || !pricing[normalizedLevel][normalizedType]) {
     return null;
