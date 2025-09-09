@@ -2,6 +2,7 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { resetPricingCache } from '../../../utils/leadPricing.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -10,17 +11,17 @@ const LEAD_PRICING_PATH = path.join(__dirname, '../../../config/leadPricing.json
 
 // Default pricing object
 const DEFAULT_PRICING = {
-  subscriber: {
+  Subscriber: {
     auto: 20.50,
     home: 20.50,
     mortgage: 20.50,
   },
-  startup: {
+  Startup: {
     auto: 20.50,
     home: 20.50,
     mortgage: 20.50,
   },
-  agency: {
+  Agency: {
     auto: 20.50,
     home: 20.50,
     mortgage: 20.50,
@@ -70,34 +71,70 @@ export const getLeadPricing = async () => {
 // Set lead pricing in JSON file
 export const setLeadPricing = async (pricing) => {
   try {
+    // Get existing pricing data
+    let existingPricing;
+    try {
+      const data = await fs.promises.readFile(LEAD_PRICING_PATH, 'utf8');
+      existingPricing = JSON.parse(data);
+    } catch (err) {
+      console.log('Could not read existing pricing, using default');
+      existingPricing = DEFAULT_PRICING;
+    }
+    
     // Validate pricing structure
-    const requiredMemberships = ['subscriber', 'startup', 'agency'];
+    const requiredMemberships = ['Subscriber', 'Startup', 'Agency'];
     const requiredTypes = ['auto', 'home', 'mortgage'];
     
-    // Check if pricing has required memberships
-    for (const membership of requiredMemberships) {
-      if (!pricing[membership]) {
-        throw new Error(`Missing required membership: ${membership}`);
-      }
+    // Merge the new pricing with existing pricing
+    const updatedPricing = { ...existingPricing };
+    
+    // Only update the values that are provided
+    for (const membership of Object.keys(pricing)) {
+      // Case-insensitive match against required memberships
+      const matchedMembership = requiredMemberships.find(
+        m => m.toLowerCase() === membership.toLowerCase()
+      );
       
-      // Check if membership has required lead types
-      for (const type of requiredTypes) {
-        if (pricing[membership][type] === undefined) {
-          throw new Error(`Missing required lead type ${type} for ${membership}`);
+      if (matchedMembership) {
+        // Use the correctly cased membership from our requirements
+        if (!updatedPricing[matchedMembership]) {
+          updatedPricing[matchedMembership] = {};
         }
         
-        // Ensure values are numbers
-        if (isNaN(parseFloat(pricing[membership][type]))) {
-          throw new Error(`Invalid price value for ${membership}.${type}`);
+        // Update specific lead types if provided
+        for (const type of Object.keys(pricing[membership])) {
+          if (requiredTypes.includes(type)) {
+            const value = pricing[membership][type];
+            
+            // Ensure values are numbers
+            if (isNaN(parseFloat(value))) {
+              throw new Error(`Invalid price value for ${matchedMembership}.${type}`);
+            }
+            
+            // Format to 2 decimal places
+            updatedPricing[matchedMembership][type] = parseFloat(value).toFixed(2);
+          }
         }
-        
-        // Format to 2 decimal places
-        pricing[membership][type] = parseFloat(pricing[membership][type]).toFixed(2);
       }
     }
     
-    await fs.promises.writeFile(LEAD_PRICING_PATH, JSON.stringify(pricing, null, 2), 'utf8');
-    return pricing;
+    // Ensure all required fields exist
+    for (const membership of requiredMemberships) {
+      if (!updatedPricing[membership]) {
+        updatedPricing[membership] = DEFAULT_PRICING[membership];
+      }
+      
+      for (const type of requiredTypes) {
+        if (updatedPricing[membership][type] === undefined) {
+          updatedPricing[membership][type] = DEFAULT_PRICING[membership][type];
+        }
+      }
+    }
+    
+    await fs.promises.writeFile(LEAD_PRICING_PATH, JSON.stringify(updatedPricing, null, 2), 'utf8');
+    // Reset the cache so calculateLeadPrice will use the new prices
+    resetPricingCache();
+    return updatedPricing;
   } catch (err) {
     throw new Error('Failed to save lead pricing: ' + err.message);
   }

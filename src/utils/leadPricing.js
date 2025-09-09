@@ -29,6 +29,8 @@ const defaultPricing = {
 const getPricing = () => {
   try {
     if (!fs.existsSync(LEAD_PRICING_PATH)) {
+      // If the file doesn't exist, create it with the default pricing
+      fs.writeFileSync(LEAD_PRICING_PATH, JSON.stringify(defaultPricing, null, 2), 'utf8');
       return defaultPricing;
     }
     const data = fs.readFileSync(LEAD_PRICING_PATH, 'utf8');
@@ -39,14 +41,42 @@ const getPricing = () => {
   }
 };
 
-export const calculateLeadPrice = (memberLevel, leadType) => {
-  const pricing = getPricing();
+// Cache the pricing data to avoid reading the file on every request
+let cachedPricing = null;
+let lastCacheTime = 0;
+const CACHE_TTL = 60000; // 1 minute TTL for cache
 
-  const normalizedLevel = String(memberLevel)
-  const normalizedType = String(leadType)
+// Get pricing with cache
+const getCachedPricing = () => {
+  const now = Date.now();
+  if (!cachedPricing || now - lastCacheTime > CACHE_TTL) {
+    cachedPricing = getPricing();
+    lastCacheTime = now;
+  }
+  return cachedPricing;
+};
+
+export const calculateLeadPrice = (memberLevel, leadType) => {
+  const pricing = getCachedPricing();
+
+  // Normalize inputs for case-insensitive comparison
+  const normalizedLevel = String(memberLevel).charAt(0).toUpperCase() + String(memberLevel).slice(1).toLowerCase();
+  const normalizedType = String(leadType).toLowerCase();
 
   if (!pricing[normalizedLevel] || !pricing[normalizedLevel][normalizedType]) {
+    console.warn(`Price not found for ${normalizedLevel} - ${normalizedType}`);
     return null;
   }
-  return pricing[normalizedLevel][normalizedType];
+  return parseFloat(pricing[normalizedLevel][normalizedType]);
 }
+
+// Get the full pricing data
+export const getPricingData = () => {
+  return getCachedPricing();
+};
+
+// Reset the pricing cache
+export const resetPricingCache = () => {
+  cachedPricing = null;
+  lastCacheTime = 0;
+};

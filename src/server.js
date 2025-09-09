@@ -1,6 +1,7 @@
 import config from './config/index.js';
 import app from './app.js';
 import { initializeDatabase } from './db/sequelize.js';
+import { ensureLeadPricingFile } from './utils/ensureConfigFiles.js';
 
 // Handle uncaught exceptions
 process.on('uncaughtException', error => {
@@ -15,6 +16,10 @@ async function bootstrap() {
     // Connect to the MySQL database
     await initializeDatabase();
     console.log('🛢   MySQL database is connected successfully');
+
+    // Ensure configuration files exist
+    await ensureLeadPricingFile();
+    console.log('📄 Configuration files validated');
 
     // Start the server
     server = app.listen(config.port, () => {

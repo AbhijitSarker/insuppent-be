@@ -65,21 +65,21 @@ export const updateLeadPricing = async (req, res) => {
     const { pricing } = req.body;
     console.log('Received pricing update request:', pricing);
     
-    if (!pricing) {
-      console.log('Error: Pricing data is missing');
+    if (!pricing || typeof pricing !== 'object' || Object.keys(pricing).length === 0) {
+      console.log('Error: Pricing data is missing or invalid');
       return res.status(400).json({
         success: false,
-        message: 'Pricing data is required'
+        message: 'Valid pricing data is required'
       });
     }
 
-    await setLeadPricingService(pricing);
+    const updatedPricing = await setLeadPricingService(pricing);
     console.log('Lead pricing updated successfully');
     
     res.status(200).json({
       success: true,
       message: 'Lead pricing updated successfully',
-      pricing
+      pricing: updatedPricing
     });
   } catch (error) {
     console.error('Error updating lead pricing:', error.message);
