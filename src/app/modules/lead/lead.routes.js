@@ -19,6 +19,10 @@ router.get(
   adminAuth,
   LeadController.getAllLeadMembershipMaxSaleCounts
 );
+router.patch(
+  '/:id/status',
+  LeadController.updateStatus,
+);
 
 router.use(requireAuth);
 
@@ -36,10 +40,7 @@ router.patch(
 router.delete(
   '/:id',
   LeadController.deleteLead);
-router.patch(
-  '/:id/status',
-  LeadController.updateStatus,
-);
+
 
 // Get lead sale counts by membership
 router.get(
