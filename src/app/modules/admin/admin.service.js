@@ -95,6 +95,28 @@ const refreshToken = async token => {
   };
 };
 
+const changePassword = async (adminId, currentPassword, newPassword) => {
+  const admin = await Admin.scope(null).findByPk(adminId, {
+    attributes: { include: ['password'] },
+  });
+  
+  if (!admin) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'Admin not found');
+  }
+
+  // Verify current password
+  const isPasswordValid = await admin.isPasswordMatched(currentPassword);
+  if (!isPasswordValid) {
+    throw new ApiError(httpStatus.UNAUTHORIZED, 'Current password is incorrect');
+  }
+
+  // Update password
+  admin.password = newPassword;
+  await admin.save();
+
+  return { success: true };
+};
+
 const getAdminProfile = async id => {
   const result = await Admin.findByPk(id);
   if (!result) {
@@ -149,6 +171,7 @@ export const AdminService = {
   createAdmin,
   loginAdmin,
   refreshToken,
+  changePassword,
   getAdminProfile,
   updateAdminProfile,
 };

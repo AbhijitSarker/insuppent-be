@@ -3,7 +3,9 @@ import express from 'express';
 import { LeadRoutes } from '../modules/lead/lead.routes.js';
 import purchaseRoutes from '../modules/purchase/leadPurchase.routes.js';
 import { AdminRoutes } from '../modules/admin/admin.routes.js';
+import { AdminAuthRoutes } from '../modules/admin/auth/admin.auth.routes.js';
 import { UserRoutes } from '../modules/user/user.routes.js';
+import { adminAuth } from '../middlewares/adminAuth.js';
 
 import AuthRoutes from '../modules/auth/auth.routes.js';
 import { SettingsRoutes } from '../modules/settings/settings.routes.js';
@@ -20,8 +22,13 @@ const moduleRoutes = [
     route: purchaseRoutes,
   },
   {
+    path: '/admin/auth',
+    route: AdminAuthRoutes,
+  },
+  {
     path: '/admin',
     route: AdminRoutes,
+    middleware: adminAuth
   },
   {
     path: '/users',
@@ -37,6 +44,12 @@ const moduleRoutes = [
   }
 ];
 
-moduleRoutes.forEach(route => router.use(route.path, route.route));
+moduleRoutes.forEach(route => {
+  if (route.middleware) {
+    router.use(route.path, route.middleware, route.route);
+  } else {
+    router.use(route.path, route.route);
+  }
+});
 
 export default router;

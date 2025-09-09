@@ -5,7 +5,22 @@ import config from '../../../config/index.js';
 
 export class Admin extends Model {
   async isPasswordMatched(givenPassword) {
-    return bcrypt.compare(givenPassword, this.password);
+    console.log('Comparing passwords...');
+    console.log('Given password:', givenPassword);
+    console.log('Stored hash:', this.password);
+    try {
+      // Manual hash for comparison
+      const saltRounds = 12;
+      const manualHash = await bcrypt.hash(givenPassword, saltRounds);
+      console.log('Manual hash of given password:', manualHash);
+      
+      const result = await bcrypt.compare(givenPassword, this.password);
+      console.log('Password comparison result:', result);
+      return result;
+    } catch (error) {
+      console.error('Error comparing passwords:', error);
+      return false;
+    }
   }
 }
 
@@ -39,6 +54,14 @@ Admin.init(
       allowNull: false,
       defaultValue: 'active',
     },
+    passwordResetToken: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    passwordResetExpires: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
   },
   {
     sequelize,
@@ -46,7 +69,7 @@ Admin.init(
     tableName: 'Admin',
     timestamps: true,
     defaultScope: {
-      attributes: { exclude: ['password'] },
+      attributes: { exclude: ['password', 'passwordResetToken', 'passwordResetExpires'] },
     },
     hooks: {
       beforeCreate: async admin => {

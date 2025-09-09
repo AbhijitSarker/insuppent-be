@@ -48,6 +48,20 @@ const refreshToken = catchAsync(async (req, res) => {
   });
 });
 
+const changePassword = catchAsync(async (req, res) => {
+  const { currentPassword, newPassword } = req.body;
+  const adminId = req.user.id;
+
+  const result = await AdminService.changePassword(adminId, currentPassword, newPassword);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Password changed successfully',
+    data: result,
+  });
+});
+
 const getAdminProfile = catchAsync(async (req, res) => {
   const result = await AdminService.getAdminProfile(req.user.id);
 
@@ -87,6 +101,7 @@ export const AdminController = {
   createAdmin,
   loginAdmin,
   refreshToken,
+  changePassword,
   getAdminProfile,
   updateAdminProfile,
   markLeadUserRefundedController,
