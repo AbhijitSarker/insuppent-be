@@ -57,7 +57,7 @@ const getAllLeads = async () => {
   return result;
 };
 
-const findLeads = async (memberLevelFromUser = 'subscriber', userId = null) => {
+const findLeads = async (memberLevelFromUser = 'Subscriber', userId = null) => {
   // Exclude leads already purchased by the user
   let excludeLeadIds = [];
   // if (userId) {
@@ -70,12 +70,13 @@ const findLeads = async (memberLevelFromUser = 'subscriber', userId = null) => {
   // }
 //todo
   // Fetch maxLeadSaleCount for this membership
-  const membership = memberLevelFromUser || 'subscriber';
-  console.log('Finding leads for membership:', membership, 'and userId:', userId);
-  let maxLeadSaleCount = 50;
+  const membership = memberLevelFromUser || 'Subscriber';
+  let maxLeadSaleCount = 50; // Default value
   const membershipConfig = await LeadMembershipMaxSaleCount.findOne({ where: { membership } });
-  if (membershipConfig) maxLeadSaleCount = membershipConfig.maxLeadSaleCount;
-  console.log(`Membership: ${membershipConfig.maxLeadSaleCount}, Max Lead Sale Count: ${maxLeadSaleCount}`);
+  if (membershipConfig && membershipConfig.maxLeadSaleCount !== null) {
+    maxLeadSaleCount = membershipConfig.maxLeadSaleCount;
+  } else {
+  }
   // Only return leads that are public, not purchased by user, and saleCount < maxLeadSaleCount
   const where = {
     status: 'public',
@@ -89,7 +90,7 @@ const findLeads = async (memberLevelFromUser = 'subscriber', userId = null) => {
   const maskedResult = filteredResult.map(lead => {
     const leadObj = lead.toJSON();
     const leadType = leadObj.leadType || leadObj.type || 'auto';
-    const price = calculateLeadPrice('subscriber', leadType);
+    const price = calculateLeadPrice(membership, leadType);
     return {
       ...leadObj,
       email: leadObj.email.replace(/(.{2})(.*)(@.*)/, '$1***$3'),
