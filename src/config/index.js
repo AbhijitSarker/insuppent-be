@@ -24,6 +24,8 @@ export default {
     expires_in: process.env.JWT_EXPIRES_IN || '7d',
     refresh_secret: process.env.JWT_REFRESH_SECRET || 'your-refresh-secret',
     refresh_expires_in: process.env.JWT_REFRESH_EXPIRES_IN || '7d',
+    admin_secret: process.env.JWT_SECRET || 'your-secret-key',
+    admin_expires_in: process.env.JWT_EXPIRES_IN || '7d',
   },
   stripeSecretKey: process.env.STRIPE_SECRET_KEY,
   stripeWebhookSecret: process.env.STRIPE_WEBHOOK_SECRET,

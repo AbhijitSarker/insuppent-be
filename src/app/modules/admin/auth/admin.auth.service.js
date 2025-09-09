@@ -34,18 +34,28 @@ export const registerAdmin = async (payload) => {
 };
 
 export const loginAdmin = async (email, password) => {
+  console.log('Login attempt for email:', email);
+  
   // Find admin by email with password
   const admin = await Admin.findOne({
     where: { email },
     attributes: { include: ['password'] },
   });
 
-  if (!admin || admin.status !== 'active') {
+  if (!admin) {
+    console.log('No admin found with email:', email);
+    throw new ApiError(httpStatus.UNAUTHORIZED, 'Invalid credentials');
+  }
+
+  if (admin.status !== 'active') {
+    console.log('Admin account is not active:', email);
     throw new ApiError(httpStatus.UNAUTHORIZED, 'Invalid credentials');
   }
 
   // Check password
   const isPasswordValid = await admin.isPasswordMatched(password);
+  console.log('Password validation result:', isPasswordValid);
+  
   if (!isPasswordValid) {
     throw new ApiError(httpStatus.UNAUTHORIZED, 'Invalid credentials');
   }
@@ -156,9 +166,39 @@ export const resetPassword = async (token, newPassword) => {
 };
 
 export const getAdminProfile = async (adminId) => {
-  const admin = await Admin.findByPk(adminId);
+  const admin = await Admin.findByPk(adminId, {
+    attributes: { exclude: ['password'] },
+  });
   if (!admin) {
     throw new ApiError(httpStatus.NOT_FOUND, 'Admin not found');
   }
   return admin;
+};
+
+export const changePassword = async (adminId, currentPassword, newPassword) => {
+  // Find admin with password
+  const admin = await Admin.findByPk(adminId, {
+    attributes: { include: ['password'] },
+  });
+
+  if (!admin) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'Admin not found');
+  }
+
+  // Verify current password
+  const isPasswordValid = await admin.isPasswordMatched(currentPassword);
+  if (!isPasswordValid) {
+    throw new ApiError(httpStatus.UNAUTHORIZED, 'Current password is incorrect');
+  }
+
+  // Hash new password
+  const hashedPassword = await bcrypt.hash(newPassword, 12);
+
+  // Update password
+  await Admin.update(
+    { password: hashedPassword },
+    { where: { id: adminId } }
+  );
+
+  return { message: 'Password changed successfully' };
 };

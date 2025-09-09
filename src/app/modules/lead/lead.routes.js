@@ -3,24 +3,27 @@ import { LeadController } from './lead.controller.js';
 import validateRequest from '../../middlewares/validateRequest.js';
 import { LeadValidation } from './lead.validations.js';
 import { requireAuth, requireRole } from '../../middlewares/wpAuth.js';
+import { adminAuth } from '../../middlewares/adminAuth.js';
+
 
 const router = express.Router();
 
 router.post('/webhook', LeadController.webhookHandler);
-
-router.use(requireAuth);
-
 // Protected routes
 router.get('/',
-  requireRole(['admin', 'administrator', 'manager']),
+  adminAuth,
   LeadController.getAllLeads);
-
-router.get('/find', LeadController.findLeads);
 
 router.get(
   '/max-lead-sale-count',
+  adminAuth,
   LeadController.getAllLeadMembershipMaxSaleCounts
 );
+
+router.use(requireAuth);
+
+router.get('/find', LeadController.findLeads);
+
 router.get(
   '/:id',
   LeadController.getSingleLead

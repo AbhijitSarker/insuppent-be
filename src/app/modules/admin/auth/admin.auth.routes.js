@@ -34,7 +34,12 @@ router.post(
 // Protected routes
 router.get('/profile', adminAuth, adminAuthController.getAdminProfile);
 
-// Protected routes
-router.get('/profile', adminAuth, adminAuthController.getAdminProfile);
+// Change password
+router.post(
+  '/change-password',
+  adminAuth,
+  validateRequest(AdminValidation.changePassword),
+  adminAuthController.changePassword
+);
 
 export const AdminAuthRoutes = router;

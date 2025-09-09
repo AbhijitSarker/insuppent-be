@@ -61,3 +61,17 @@ export const getAdminProfile = catchAsync(async (req, res) => {
     data: admin,
   });
 });
+
+export const changePassword = catchAsync(async (req, res) => {
+  const { currentPassword, newPassword } = req.body;
+  const adminId = req.admin.id;
+
+  const result = await adminAuthService.changePassword(adminId, currentPassword, newPassword);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Password changed successfully',
+    data: result,
+  });
+});

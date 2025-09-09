@@ -8,22 +8,15 @@ import { ENUM_USER_ROLE } from '../../../enums/user.js';
 
 const router = express.Router();
 
-// Public routes
-router.post(
-  '/signup',
-  validateRequest(AdminValidation.createAdmin),
-  AdminController.createAdmin,
-);
-
-router.post(
-  '/login',
-  validateRequest(AdminValidation.loginAdmin),
-  AdminController.loginAdmin,
-);
-
-router.post('/refresh-token', AdminController.refreshToken);
+// Protected routes begin here
 
 // Protected routes
+router.post(
+  '/change-password',
+  // auth(ENUM_USER_ROLE.ADMIN, ENUM_USER_ROLE.SUPER_ADMIN),
+  validateRequest(AdminValidation.changePassword),
+  AdminController.changePassword
+);
 router.get(
   '/profile',
   // auth(ENUM_USER_ROLE.ADMIN, ENUM_USER_ROLE.SUPER_ADMIN),
