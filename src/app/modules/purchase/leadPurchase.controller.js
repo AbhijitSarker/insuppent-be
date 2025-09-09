@@ -58,10 +58,12 @@ export const stripeWebhook = async (req, res, next) => {
     return res.status(400).send(`Webhook Error: ${err.message}`);
   }
   if (event.type === 'checkout.session.completed') {
-
+    console.log('Processing checkout.session.completed event', req.body, event.data);
     const session = event.data.object;
     const userId = session.metadata.userId;
+    const price = session.amount_total / 100;
     const leadIds = session.metadata.leadIds.split(',').map(Number);
+    console.log('Processing purchase for user:', session.metadata);
     await recordLeadPurchases({ userId, leadIds, stripeSessionId: session.id });
     // Update user's purchased count
     try {
@@ -81,6 +83,7 @@ export const stripeWebhook = async (req, res, next) => {
         for (const leadId of leadIds) {
           // Always fetch lead from DB to ensure latest info
           const lead = await LeadService.getSingleLead(leadId);
+          console.log('Fetched lead for email:', lead, lead ? 'found' : 'not found');
           if (lead) {
             purchasedLeads.push(lead.toJSON());
             try {
@@ -103,7 +106,8 @@ export const stripeWebhook = async (req, res, next) => {
             },
             leads: purchasedLeads,
             sessionId: session.id,
-            purchaseDate
+            purchaseDate,
+            totalAmount: price
           };
           
           const adminMailResult = await sendAdminPurchaseNotification(purchaseData);
