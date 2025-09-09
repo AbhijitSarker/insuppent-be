@@ -1,0 +1,17 @@
+{
+  "subscriber": {
+    "auto": 20.50,
+    "home": 20.50,
+    "mortgage": 20.50
+  },
+  "startup": {
+    "auto": 20.50,
+    "home": 20.50,
+    "mortgage": 20.50
+  },
+  "agency": {
+    "auto": 20.50,
+    "home": 20.50,
+    "mortgage": 20.50
+  }
+}
