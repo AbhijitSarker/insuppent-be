@@ -36,7 +36,7 @@ let initialized = false;
 export async function initializeDatabase() {
   if (initialized) return;
 
-  // TEMP: Allow sync in production to create tables if missing. Remove after first run!
+  // Create database if it doesn't exist (except in production)
   if (config.env !== 'production') {
     const connection = await mysql.createConnection({ host, port, user, password });
     await connection.query(
@@ -46,8 +46,11 @@ export async function initializeDatabase() {
   }
 
   await sequelize.authenticate();
-  // --- REMOVE THIS BLOCK AFTER TABLES ARE CREATED IN PRODUCTION ---
-  // await sequelize.sync({ alter: true });
-  // --------------------------------------------------------------
+
+  // Sync models as needed
+  if (config.env !== 'production') {
+    await sequelize.sync({ alter: true });
+  }
+
   initialized = true;
 }

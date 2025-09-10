@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "5001:5000"
+    environment:
+      - NODE_ENV=production
+      # Add your environment variables here
+      # - DATABASE_URL=your_database_url
+      # - JWT_SECRET=your_jwt_secret
+      # - SESSION_SECRET=your_session_secret
+      # - MAIL_HOST=your_mail_host
+      # - MAIL_USER=your_mail_user
+      # - MAIL_PASS=your_mail_pass
+    volumes:
+      - .:/app
+      - /app/node_modules
+    restart: unless-stopped
+    # Uncomment and configure if you're using a database
+    # depends_on:
+    #   - db
+
+  # Uncomment if you want to add a database service
+  # db:
+  #   image: postgres:15-alpine
+  #   ports:
+  #     - "5432:5432"
+  #   environment:
+  #     - POSTGRES_USER=your_db_user
+  #     - POSTGRES_PASSWORD=your_db_password
+  #     - POSTGRES_DB=your_db_name
+  #   volumes:
+  #     - postgres_data:/var/lib/postgresql/data
+  #   restart: unless-stopped
+
+# Uncomment if using database
+# volumes:
+#   postgres_data:
