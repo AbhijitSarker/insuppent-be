@@ -2,6 +2,7 @@
 import httpStatus from 'http-status';
 import catchAsync from '../../../shared/catchAsync.js';
 import sendResponse from '../../../shared/sendResponse.js';
+import config from '../../../config/index.js';
 import { verifyToken, refreshUserData } from './auth.service.js';
 import { UserService } from '../user/user.service.js';
 
@@ -31,7 +32,8 @@ const verifyWordPressAuth = catchAsync(async (req, res) => {
     try {
         const wpUser = verificationResult.user;
         console.log('Verified WP User:', wpUser);
-        const userData = {
+
+        const userCreateData = {
             userid: wpUser.userid,
             name: wpUser.name || wpUser.display_name,
             email: wpUser.email,
@@ -43,12 +45,12 @@ const verifyWordPressAuth = catchAsync(async (req, res) => {
         // Try to create user, if exists it will throw an error
         let dbUser = null;
         try {
-            dbUser = await UserService.createUser(userData);
+            dbUser = await UserService.createUser(userCreateData);
             console.log('New user created:', dbUser);
         } catch (error) {
             if (error.statusCode === httpStatus.BAD_REQUEST && error.message === 'Email already exists') {
                 // User exists, get their details
-                const existingUser = await UserService.getUserByEmail(userData.email);
+                const existingUser = await UserService.getUserByEmail(userCreateData.email);
                 dbUser = existingUser;
                 console.log('Existing user found:', dbUser);
             } else {
@@ -56,22 +58,59 @@ const verifyWordPressAuth = catchAsync(async (req, res) => {
             }
         }
 
-        // Store user data in session
-        req.session.user = {
+        // Create the session user data object
+        const sessionUserData = {
             ...verificationResult.user,
             uid,
             token,
             authenticatedAt: new Date().toISOString(),
-            dbUserId: dbUser.id // Store our database user ID in the session
+            dbUserId: dbUser.id
         };
 
-        // Save session
+        // Store in session
+        req.session.user = sessionUserData;
+
+        // Set secure httpOnly cookie with user data
+        res.cookie('auth', JSON.stringify(sessionUserData), {
+            httpOnly: true,
+            secure: config.env === 'production',
+            sameSite: config.env === 'production' ? 'none' : 'lax',
+            maxAge: 24 * 60 * 60 * 1000, // 24 hours
+            path: '/'
+        });
+
+        // Also set a non-httpOnly cookie for frontend access
+        res.cookie('authStatus', 'true', {
+            httpOnly: false,
+            secure: config.env === 'production',
+            sameSite: config.env === 'production' ? 'none' : 'lax',
+            maxAge: 24 * 60 * 60 * 1000,
+            path: '/'
+        });
+
+        // Force session save
         await new Promise((resolve, reject) => {
             req.session.save((err) => {
-                if (err) reject(err);
-                else resolve();
+                if (err) {
+                    console.error('Session save error:', err);
+                    reject(err);
+                } else {
+                    console.log('Session and cookies set successfully');
+                    resolve();
+                }
             });
         });
+
+        sendResponse(res, {
+            statusCode: httpStatus.OK,
+            success: true,
+            message: 'Authentication successful',
+            data: {
+                user: verificationResult.user,
+                sessionId: req.session.id,
+            },
+        });
+
     } catch (error) {
         console.error('Error creating/updating user:', error);
         return sendResponse(res, {
@@ -80,20 +119,11 @@ const verifyWordPressAuth = catchAsync(async (req, res) => {
             message: 'Error creating user account',
         });
     }
-
-    sendResponse(res, {
-        statusCode: httpStatus.OK,
-        success: true,
-        message: 'Authentication successful',
-        data: {
-            user: verificationResult.user,
-            sessionId: req.session.id,
-        },
-    });
 });
 
 const getCurrentUser = catchAsync(async (req, res) => {
-    if (!req.session.user) {
+    // Use the user data that was already parsed and validated by the auth middleware
+    if (!req.user) {
         return sendResponse(res, {
             statusCode: httpStatus.UNAUTHORIZED,
             success: false,
@@ -101,11 +131,11 @@ const getCurrentUser = catchAsync(async (req, res) => {
         });
     }
 
-    sendResponse(res, {
+    return sendResponse(res, {
         statusCode: httpStatus.OK,
         success: true,
         data: {
-            user: req.session.user,
+            user: req.user,
             isAuthenticated: true,
         },
     });
@@ -121,7 +151,11 @@ const logout = catchAsync(async (req, res) => {
             });
         }
 
-        res.clearCookie('connect.sid'); // Clear session cookie
+        // Clear all auth-related cookies
+        res.clearCookie('connect.sid');
+        res.clearCookie('auth');
+        res.clearCookie('authStatus');
+
         sendResponse(res, {
             statusCode: httpStatus.OK,
             success: true,

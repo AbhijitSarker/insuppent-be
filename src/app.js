@@ -21,6 +21,10 @@ app.use(morgan('dev'));
 // app.use(cors());
 
 // CORS configuration for session-based authentication
+// Parse cookies first
+app.use(cookieParser(config.sessionSecret));
+
+// Then set up CORS with credentials
 app.use(cors({
   origin: [
     config.frontendUrl || 'http://localhost:5173',
@@ -31,9 +35,9 @@ app.use(cors({
   credentials: true,
   optionsSuccessStatus: 200,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Cookie'],
+  exposedHeaders: ['set-cookie']
 }));
-app.use(cookieParser());
 
 // Session middleware (for SSO)
 app.use(sessionMiddleware);

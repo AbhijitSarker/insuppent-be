@@ -6,6 +6,7 @@ import {
     logout,
     refreshAuth,
 } from './auth.controller.js';
+import { requireAuth } from '../../middlewares/wpAuth.js';
 
 const router = express.Router();
 
@@ -13,7 +14,7 @@ const router = express.Router();
 router.get('/verify', verifyWordPressAuth);
 
 // Get current authenticated user
-router.get('/me', getCurrentUser);
+router.get('/me', requireAuth, getCurrentUser);
 
 // Refresh authentication
 router.post('/refresh', refreshAuth);

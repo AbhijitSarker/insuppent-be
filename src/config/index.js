@@ -27,6 +27,7 @@ export default {
     admin_secret: process.env.JWT_SECRET || 'your-secret-key',
     admin_expires_in: process.env.JWT_EXPIRES_IN || '7d',
   },
+  sessionSecret: process.env.SESSION_SECRET || 'your-super-secret-session-key',
   stripeSecretKey: process.env.STRIPE_SECRET_KEY,
   stripeWebhookSecret: process.env.STRIPE_WEBHOOK_SECRET,
   frontendUrl: process.env.FRONTEND_URL,
