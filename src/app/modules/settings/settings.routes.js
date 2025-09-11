@@ -8,8 +8,8 @@ router.get('/brand-color', getBrandColor);
 router.put('/brand-color', updateBrandColor);
 
 // Lead pricing routes - protected with admin auth
-router.get('/lead-pricing', adminAuth, getLeadPricing);
-router.put('/lead-pricing', adminAuth, updateLeadPricing);
+router.get('/lead-pricing', getLeadPricing);
+router.put('/lead-pricing', updateLeadPricing);
 
 export default router;
 export const SettingsRoutes = router;

@@ -40,11 +40,12 @@ const sessionMiddleware = session({
     saveUninitialized: true, // Changed to true to ensure session is saved
     resave: true, // Changed to true to ensure session is saved
     cookie: {
-        secure: config.env === 'production',
+        secure: config.env === 'production', // Force secure in production
         httpOnly: true,
         maxAge: 24 * 60 * 60 * 1000, // 24 hours
-        sameSite: config.env === 'production' ? 'none' : 'lax', // Changed to lowercase
-        path: '/'
+        sameSite: config.env === 'production' ? 'None' : 'Lax', // Must be capitalized
+        path: '/',
+        domain: config.env === 'production' ? '.onrender.com' : undefined // Set domain for production
     },
     rolling: true,
     proxy: true // Always enable proxy to ensure correct cookie handling
