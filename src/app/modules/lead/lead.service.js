@@ -58,6 +58,7 @@ const getAllLeads = async () => {
 };
 
 const findLeads = async (memberLevelFromUser = 'Subscriber', userId = null) => {
+  console.log('Finding leads userId:', userId, 'memberLevel:', memberLevelFromUser);
   // Exclude leads already purchased by the user
   let excludeLeadIds = [];
   // if (userId) {

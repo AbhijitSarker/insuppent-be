@@ -1,3 +1,7 @@
+import { User } from './user.model.js';
+import ApiError from '../../../errors/ApiError.js';
+import httpStatus from 'http-status';
+
 const updateUserStatus = async (id, status) => {
   const user = await User.findByPk(id);
   if (!user) {
@@ -7,9 +11,6 @@ const updateUserStatus = async (id, status) => {
   await user.save();
   return user;
 };
-import { User } from './user.model.js';
-import ApiError from '../../../errors/ApiError.js';
-import httpStatus from 'http-status';
 
 const createUser = async payload => {
   console.log('Creating user with payload:', payload);
@@ -41,7 +42,7 @@ const getAllUsers = async () => {
   return result;
 };
 
-const getSingleUser = async id => {
+const getUserById = async id => {
   const result = await User.findByPk(id);
   if (!result) {
     throw new ApiError(httpStatus.NOT_FOUND, 'User not found');
@@ -62,7 +63,7 @@ const getUserByEmail = async email => {
 export const UserService = {
   createUser,
   getAllUsers,
-  getSingleUser,
+  getUserById,
   updateUserStatus,
   getUserByEmail,
 };

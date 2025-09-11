@@ -26,9 +26,9 @@ app.use(cors({
   credentials: true,
   optionsSuccessStatus: 200,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Cookie'],
-  exposedHeaders: ['Set-Cookie', 'set-cookie'],
-  preflightContinue: true,
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Cookie', 'stripe-signature'],
+  exposedHeaders: ['Set-Cookie'],
+  preflightContinue: false,
   maxAge: 86400 // 24 hours
 }));
 

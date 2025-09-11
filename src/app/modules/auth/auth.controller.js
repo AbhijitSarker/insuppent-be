@@ -8,27 +8,26 @@ import { UserService } from '../user/user.service.js';
 import { jwtHelpers } from '../../../helpers/jwtHelpers.js';
 
 const checkAuth = catchAsync(async (req, res) => {
-    if (!req.cookies) {
-        console.log('No cookies present in request');
-        return sendResponse(res, {
-            statusCode: httpStatus.UNAUTHORIZED,
-            success: false,
-            message: 'No cookies present'
-        });
-    }
-
-    const accessToken = req.cookies.accessToken;
-    
-    if (!accessToken) {
-        console.log('No access token found in cookies');
-        return sendResponse(res, {
-            statusCode: httpStatus.UNAUTHORIZED,
-            success: false,
-            message: 'Not authenticated'
-        });
-    }
-
+    console.log('Checking authentication status... request cookies:', req.cookies);
     try {
+        // First check for access token as it's our primary auth mechanism
+        const accessToken = req.cookies.accessToken;
+        if (!accessToken) {
+            console.log('No access token found');
+            return sendResponse(res, {
+                statusCode: httpStatus.UNAUTHORIZED,
+                success: false,
+                message: 'Not authenticated'
+            });
+        }
+
+        // Check for authStatus cookie (non-httpOnly) as secondary validation
+        const authStatus = req.cookies.authStatus;
+        if (!authStatus) {
+            console.log('No auth status cookie');
+            // Don't return here, just log it as the JWT is more important
+        }
+
         // Verify the token
         const decoded = jwtHelpers.verifyToken(accessToken, config.jwt.secret);
         
@@ -59,6 +58,7 @@ const checkAuth = catchAsync(async (req, res) => {
             }
         });
     } catch (error) {
+        console.error('Auth check error:', error);
         return sendResponse(res, {
             statusCode: httpStatus.UNAUTHORIZED,
             success: false,
@@ -206,26 +206,38 @@ const getCurrentUser = catchAsync(async (req, res) => {
 });
 
 const logout = catchAsync(async (req, res) => {
-    req.session.destroy((err) => {
-        if (err) {
-            return sendResponse(res, {
-                statusCode: httpStatus.INTERNAL_SERVER_ERROR,
-                success: false,
-                message: 'Failed to logout',
-            });
-        }
+    try {
+        // Clear all auth-related cookies with the same settings they were set with
+        res.clearCookie('accessToken', {
+            httpOnly: true,
+            secure: config.env === 'production',
+            sameSite: 'none'
+        });
+        
+        res.clearCookie('refreshToken', {
+            httpOnly: true,
+            secure: config.env === 'production',
+            sameSite: 'none'
+        });
+        
+        res.clearCookie('authStatus', {
+            httpOnly: false,
+            secure: config.env === 'production',
+            sameSite: 'none'
+        });
 
-        // Clear all auth-related cookies
-        res.clearCookie('connect.sid');
-        res.clearCookie('auth');
-        res.clearCookie('authStatus');
-
-        sendResponse(res, {
+        return sendResponse(res, {
             statusCode: httpStatus.OK,
             success: true,
-            message: 'Logged out successfully',
+            message: 'Logged out successfully'
         });
-    });
+    } catch (error) {
+        return sendResponse(res, {
+            statusCode: httpStatus.INTERNAL_SERVER_ERROR,
+            success: false,
+            message: 'Failed to logout'
+        });
+    }
 });
 
 const refreshAuth = catchAsync(async (req, res) => {

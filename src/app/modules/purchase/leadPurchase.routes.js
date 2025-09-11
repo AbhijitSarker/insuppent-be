@@ -6,11 +6,13 @@ import { adminAuth } from '../../middlewares/adminAuth.js';
 
 const router = express.Router();
 
-router.post('/webhook', express.raw({ type: 'application/json' }), stripeWebhook);
+// Stripe webhook route is handled in app.js before body parser
 
+// Admin routes
 router.get('/user/:userId/leads', adminAuth, getUserPurchasedLeadsController);
-router.use(requireAuth)
 
+// Authenticated routes
+router.use(requireAuth);
 router.post('/checkout', createCheckoutSession);
 router.get('/history', getPurchaseHistory);
 router.get('/my-leads', getMyLeadsController);

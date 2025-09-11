@@ -21,7 +21,7 @@ export const requireAuth = (req, res, next) => {
             // Verify the JWT token
             const decodedToken = jwtHelpers.verifyToken(accessToken, config.jwt.secret);
             req.user = decodedToken;
-
+            console.log('Decoded token:', decodedToken);
             // Validate user object structure
             if (!req.user || !req.user.id || !req.user.role) {
                 return sendResponse(res, {
