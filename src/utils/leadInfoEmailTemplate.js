@@ -64,7 +64,7 @@ const emailTemplate = leadData => `
 <body>
   <div class="container">
     <div class="logo-area">
-      <h1 style="font-size: 28px; color: #6f4e37;">Insuppent</h1>
+      <h1 style="font-size: 28px; color: #6f4e37;">Insuppent™</h1>
     </div>
     <div class="header">
       <h1>Purchase Confirmation</h1>
@@ -87,7 +87,10 @@ const emailTemplate = leadData => `
       <p>If you have any questions or need further assistance, please contact our support team.</p>
     </div>
     <div class="footer">
-      <p>&copy; ${new Date().getFullYear()} Your Company Name. All rights reserved.</p>
+      <p>Thank you,</p>
+      <p>The Insuppent Team</p>
+      <p><a href="#">&#128250;</a> <a href="#">&#62220;</a> <a href="#">&#62217;</a> <a href="#">&#62223;</a></p>
+      <p>If you received this email by mistake, simply delete it. You won't receive any more emails from us unless you confirm your subscription using the link above.</p>
     </div>
   </div>
 </body>

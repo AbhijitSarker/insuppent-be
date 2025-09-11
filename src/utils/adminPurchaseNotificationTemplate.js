@@ -1,19 +1,8 @@
-/**
- * Email template for admin purchase notifications
- * @param {Object} data - Purchase data
- * @returns {string} HTML email template
- */
 const adminPurchaseNotificationTemplate = data => {
   const { user, leads, sessionId, purchaseDate, totalAmount } = data;
 
   // For simplicity, focus on the first lead if multiple leads were purchased
   const lead = leads.length > 0 ? leads[0] : { id: 'N/A', price: 0 };
-
-  // // Calculate total amount
-  // const totalAmount = leads.reduce(
-  //   (total, lead) => total + (lead.price || 0),
-  //   0,
-  // );
 
   return `
     <!DOCTYPE html>
@@ -95,7 +84,7 @@ const adminPurchaseNotificationTemplate = data => {
     <body>
       <div class="container">
         <div class="logo-area">
-          <h1 style="font-size: 28px; color: #6f4e37;">Insuppent</h1>
+          <h1 style="font-size: 28px; color: #6f4e37;">Insuppent™</h1>
         </div>
         <div class="header">
           <h2>Payment Received</h2>
@@ -106,11 +95,10 @@ const adminPurchaseNotificationTemplate = data => {
           <div class="payment-details">
             <h3>Payment details</h3>
             <p><strong>User:</strong> ${user.name || 'N/A'} (${user.email || 'N/A'})</p>
-            ${
-              leads.length === 1
-                ? `<p><strong>Lead ID:</strong> ${lead.id}</p>`
-                : `<p><strong>Lead IDs:</strong> ${leads.map(l => l.id).join(', ')}</p>`
-            }
+            ${leads.length === 1
+      ? `<p><strong>Lead ID:</strong> ${lead.id}</p>`
+      : `<p><strong>Lead IDs:</strong> ${leads.map(l => l.id).join(', ')}</p>`
+    }
             <p><strong>Amount:</strong> $${totalAmount.toFixed(2)}</p>
             <p><strong>Date:</strong> ${purchaseDate}</p>
           </div>
@@ -122,6 +110,7 @@ const adminPurchaseNotificationTemplate = data => {
         </div>
         <div class="footer">
           <p style="margin-top: 10px;">This is an automated notification from the Insuppent platform. Please do not reply to this email.</p>
+          <p><a href="#">&#128250;</a> <a href="#">&#62220;</a> <a href="#">&#62217;</a> <a href="#">&#62223;</a></p>
         </div>
       </div>
     </body>
@@ -129,4 +118,4 @@ const adminPurchaseNotificationTemplate = data => {
   `;
 };
 
-export default adminPurchaseNotificationTemplate;
+module.exports = adminPurchaseNotificationTemplate;
