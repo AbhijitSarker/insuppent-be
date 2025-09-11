@@ -5,6 +5,8 @@ dotenv.config({ path: '.env' });
 export default {
   env: process.env.NODE_ENV,
   port: process.env.PORT || 5000,
+  domain: process.env.COOKIE_DOMAIN || 'localhost',
+  clientDomain: process.env.CLIENT_DOMAIN || 'localhost:5173',
   // Legacy Mongo config kept for reference; not used after MySQL migration
   database: {
     url: process.env.DATABASE_URL,

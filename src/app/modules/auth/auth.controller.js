@@ -145,26 +145,29 @@ const verifyWordPressAuth = catchAsync(async (req, res) => {
             config.jwt.refresh_expires_in
         );
 
-        // Set cookies
-        res.cookie('accessToken', accessToken, {
+        const cookieOptions = {
             httpOnly: true,
             secure: config.env === 'production',
-            sameSite: 'none',
+            sameSite: config.env === 'production' ? 'none' : 'lax',
+            domain: config.env === 'production' ? config.domain : undefined,
+            path: '/'
+        };
+
+        // Set cookies
+        res.cookie('accessToken', accessToken, {
+            ...cookieOptions,
             maxAge: 24 * 60 * 60 * 1000 // 24 hours
         });
 
         res.cookie('refreshToken', refreshToken, {
-            httpOnly: true,
-            secure: config.env === 'production',
-            sameSite: 'none',
+            ...cookieOptions,
             maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days
         });
 
         // Set a non-httpOnly cookie for frontend auth status check
         res.cookie('authStatus', 'true', {
+            ...cookieOptions,
             httpOnly: false,
-            secure: config.env === 'production',
-            sameSite: 'none',
             maxAge: 24 * 60 * 60 * 1000
         });
 
@@ -207,23 +210,20 @@ const getCurrentUser = catchAsync(async (req, res) => {
 
 const logout = catchAsync(async (req, res) => {
     try {
+        const cookieOptions = {
+            httpOnly: true,
+            secure: config.env === 'production',
+            sameSite: config.env === 'production' ? 'none' : 'lax',
+            domain: config.env === 'production' ? config.domain : undefined,
+            path: '/'
+        };
+
         // Clear all auth-related cookies with the same settings they were set with
-        res.clearCookie('accessToken', {
-            httpOnly: true,
-            secure: config.env === 'production',
-            sameSite: 'none'
-        });
-        
-        res.clearCookie('refreshToken', {
-            httpOnly: true,
-            secure: config.env === 'production',
-            sameSite: 'none'
-        });
-        
+        res.clearCookie('accessToken', cookieOptions);
+        res.clearCookie('refreshToken', cookieOptions);
         res.clearCookie('authStatus', {
-            httpOnly: false,
-            secure: config.env === 'production',
-            sameSite: 'none'
+            ...cookieOptions,
+            httpOnly: false
         });
 
         return sendResponse(res, {
