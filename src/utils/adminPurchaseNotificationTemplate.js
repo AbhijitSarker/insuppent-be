@@ -91,7 +91,7 @@ const adminPurchaseNotificationTemplate = data => {
         </div>
         <div class="content">
           <p>A new payment has been received successfully.</p>
-          
+
           <div class="payment-details">
             <h3>Payment details</h3>
             <p><strong>User:</strong> ${user.name || 'N/A'} (${user.email || 'N/A'})</p>
@@ -118,4 +118,4 @@ const adminPurchaseNotificationTemplate = data => {
   `;
 };
 
-module.exports = adminPurchaseNotificationTemplate;
+export default adminPurchaseNotificationTemplate;
