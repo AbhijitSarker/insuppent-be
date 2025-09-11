@@ -14,7 +14,7 @@ const router = express.Router();
 router.get('/verify', verifyWordPressAuth);
 
 // Get current authenticated user
-router.get('/me', requireAuth, getCurrentUser);
+router.get('/me', getCurrentUser);
 
 // Refresh authentication
 router.post('/refresh', refreshAuth);
