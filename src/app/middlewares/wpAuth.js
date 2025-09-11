@@ -1,12 +1,15 @@
 import httpStatus from 'http-status';
 import sendResponse from '../../shared/sendResponse.js';
 
+import { jwtHelpers } from '../../helpers/jwtHelpers.js';
+import config from '../../config/index.js';
+
 export const requireAuth = (req, res, next) => {
     try {
-        // Check both session and cookie for user data
-        const user = req.session.user || req.cookies.auth;
+        // Get the access token from cookies
+        const accessToken = req.cookies.accessToken;
 
-        if (!user) {
+        if (!accessToken) {
             return sendResponse(res, {
                 statusCode: httpStatus.UNAUTHORIZED,
                 success: false,
@@ -14,15 +17,25 @@ export const requireAuth = (req, res, next) => {
             });
         }
 
-        // Parse user data if it's from cookie
-        req.user = typeof user === 'string' ? JSON.parse(user) : user;
+        try {
+            // Verify the JWT token
+            const decodedToken = jwtHelpers.verifyToken(accessToken, config.jwt.secret);
+            req.user = decodedToken;
 
-        // Validate user object structure
-        if (!req.user || !req.user.userid || !req.user.role) {
+            // Validate user object structure
+            if (!req.user || !req.user.id || !req.user.role) {
+                return sendResponse(res, {
+                    statusCode: httpStatus.UNAUTHORIZED,
+                    success: false,
+                    message: 'Invalid authentication data',
+                });
+            }
+        } catch (tokenError) {
+            // Token verification failed
             return sendResponse(res, {
                 statusCode: httpStatus.UNAUTHORIZED,
                 success: false,
-                message: 'Invalid authentication data',
+                message: 'Invalid or expired token',
             });
         }
 
@@ -70,9 +83,14 @@ export const requireAdmin = requireRole(['administrator', 'bbp_keymaster']);
 // Optional auth - adds user to request if authenticated, but doesn't require it
 export const optionalAuth = (req, res, next) => {
     try {
-        const user = req.session.user || req.cookies.auth;
-        if (user) {
-            req.user = typeof user === 'string' ? JSON.parse(user) : user;
+        const accessToken = req.cookies.accessToken;
+        if (accessToken) {
+            try {
+                const decodedToken = jwtHelpers.verifyToken(accessToken, config.jwt.secret);
+                req.user = decodedToken;
+            } catch (tokenError) {
+                console.error('Token verification failed in optional auth:', tokenError);
+            }
         }
         next();
     } catch (error) {

@@ -5,6 +5,67 @@ import sendResponse from '../../../shared/sendResponse.js';
 import config from '../../../config/index.js';
 import { verifyToken, refreshUserData } from './auth.service.js';
 import { UserService } from '../user/user.service.js';
+import { jwtHelpers } from '../../../helpers/jwtHelpers.js';
+
+const checkAuth = catchAsync(async (req, res) => {
+    if (!req.cookies) {
+        console.log('No cookies present in request');
+        return sendResponse(res, {
+            statusCode: httpStatus.UNAUTHORIZED,
+            success: false,
+            message: 'No cookies present'
+        });
+    }
+
+    const accessToken = req.cookies.accessToken;
+    
+    if (!accessToken) {
+        console.log('No access token found in cookies');
+        return sendResponse(res, {
+            statusCode: httpStatus.UNAUTHORIZED,
+            success: false,
+            message: 'Not authenticated'
+        });
+    }
+
+    try {
+        // Verify the token
+        const decoded = jwtHelpers.verifyToken(accessToken, config.jwt.secret);
+        
+        // Get fresh user data from database
+        const user = await UserService.getUserById(decoded.id);
+        
+        if (!user) {
+            return sendResponse(res, {
+                statusCode: httpStatus.UNAUTHORIZED,
+                success: false,
+                message: 'User not found'
+            });
+        }
+
+        return sendResponse(res, {
+            statusCode: httpStatus.OK,
+            success: true,
+            message: 'User is authenticated',
+            data: {
+                id: user.id,
+                name: user.name,
+                email: user.email,
+                subscription: user.subscription,
+                status: user.status,
+                purchased: user.purchased,
+                refunded: user.refunded,
+                role: decoded.role
+            }
+        });
+    } catch (error) {
+        return sendResponse(res, {
+            statusCode: httpStatus.UNAUTHORIZED,
+            success: false,
+            message: 'Invalid or expired token'
+        });
+    }
+});
 
 const verifyWordPressAuth = catchAsync(async (req, res) => {
     const { uid, token } = req.query;
@@ -28,7 +89,6 @@ const verifyWordPressAuth = catchAsync(async (req, res) => {
         });
     }
 
-    // Try to create or update user in our database
     try {
         const wpUser = verificationResult.user;
         console.log('Verified WP User:', wpUser);
@@ -58,57 +118,61 @@ const verifyWordPressAuth = catchAsync(async (req, res) => {
             }
         }
 
-        // Create the session user data object
-        const sessionUserData = {
-            ...verificationResult.user,
-            uid,
-            token,
-            authenticatedAt: new Date().toISOString(),
-            dbUserId: dbUser.id
+        // Create tokens and user data
+        const userData = {
+            id: dbUser.id,
+            name: dbUser.name,
+            email: dbUser.email,
+            subscription: dbUser.subscription,
+            status: dbUser.status,
+            purchased: dbUser.purchased,
+            refunded: dbUser.refunded,
+            role: verificationResult.user.role,
+            wpUserId: uid
         };
 
-        // Store in session
-        req.session.user = sessionUserData;
+        // Create access token
+        const accessToken = jwtHelpers.createToken(
+            { ...userData },
+            config.jwt.secret,
+            config.jwt.expires_in
+        );
 
-        // Set secure httpOnly cookie with user data
-        res.cookie('auth', JSON.stringify(sessionUserData), {
+        // Create refresh token
+        const refreshToken = jwtHelpers.createToken(
+            { id: dbUser.id },
+            config.jwt.refresh_secret,
+            config.jwt.refresh_expires_in
+        );
+
+        // Set cookies
+        res.cookie('accessToken', accessToken, {
             httpOnly: true,
             secure: config.env === 'production',
-            sameSite: config.env === 'production' ? 'none' : 'lax',
-            maxAge: 24 * 60 * 60 * 1000, // 24 hours
-            path: '/'
+            sameSite: 'none',
+            maxAge: 24 * 60 * 60 * 1000 // 24 hours
         });
 
-        // Also set a non-httpOnly cookie for frontend access
+        res.cookie('refreshToken', refreshToken, {
+            httpOnly: true,
+            secure: config.env === 'production',
+            sameSite: 'none',
+            maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days
+        });
+
+        // Set a non-httpOnly cookie for frontend auth status check
         res.cookie('authStatus', 'true', {
             httpOnly: false,
             secure: config.env === 'production',
-            sameSite: config.env === 'production' ? 'none' : 'lax',
-            maxAge: 24 * 60 * 60 * 1000,
-            path: '/'
+            sameSite: 'none',
+            maxAge: 24 * 60 * 60 * 1000
         });
 
-        // Force session save
-        await new Promise((resolve, reject) => {
-            req.session.save((err) => {
-                if (err) {
-                    console.error('Session save error:', err);
-                    reject(err);
-                } else {
-                    console.log('Session and cookies set successfully');
-                    resolve();
-                }
-            });
-        });
-
-        sendResponse(res, {
+        return sendResponse(res, {
             statusCode: httpStatus.OK,
             success: true,
-            message: 'Authentication successful',
-            data: {
-                user: verificationResult.user,
-                sessionId: req.session.id,
-            },
+            message: 'User logged in successfully',
+            data: userData
         });
 
     } catch (error) {
@@ -215,4 +279,5 @@ export {
     getCurrentUser,
     logout,
     refreshAuth,
+    checkAuth,
 };

@@ -1,27 +1,47 @@
 // app/middlewares/auth.js
 import httpStatus from 'http-status';
+import { jwtHelpers } from '../../helpers/jwtHelpers.js';
+import config from '../../config/index.js';
 
 // Middleware to check if user is authenticated
 export const requireAuth = (req, res, next) => {
-  if (!req.session.user || !req.session.user.isAuthenticated) {
+  try {
+    const accessToken = req.cookies.accessToken;
+    
+    if (!accessToken) {
+      return res.status(httpStatus.UNAUTHORIZED).json({
+        success: false,
+        message: 'Authentication required',
+        errorMessages: [
+          {
+            path: req.originalUrl,
+            message: 'Please login to access this resource',
+          },
+        ],
+      });
+    }
+
+    const decoded = jwtHelpers.verifyToken(accessToken, config.jwt.secret);
+    req.user = decoded;
+    next();
+  } catch (error) {
     return res.status(httpStatus.UNAUTHORIZED).json({
       success: false,
-      message: 'Authentication required',
+      message: 'Invalid or expired token',
       errorMessages: [
         {
           path: req.originalUrl,
-          message: 'Please login to access this resource',
+          message: 'Please login again',
         },
       ],
     });
   }
-  next();
 };
 
 // Middleware to check if user has specific roles
 export const requireRole = (roles = []) => {
   return (req, res, next) => {
-    if (!req.session.user || !req.session.user.isAuthenticated) {
+    if (!req.user) {
       return res.status(httpStatus.UNAUTHORIZED).json({
         success: false,
         message: 'Authentication required',

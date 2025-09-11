@@ -7,10 +7,8 @@ import { stripeWebhook } from './app/modules/purchase/leadPurchase.controller.js
 import cookieParser from 'cookie-parser';
 import morgan from 'morgan';
 
-import sessionMiddleware from './app/middlewares/session.js';
 import config from './config/index.js';
 import settingsRoutes from './app/modules/settings/settings.routes.js';
-
 
 const app = express();
 app.set('trust proxy', true);
@@ -18,13 +16,6 @@ app.set('trust proxy', true);
 // HTTP request logger
 app.use(morgan('dev'));
 
-// app.use(cors());
-
-// CORS configuration for session-based authentication
-// Parse cookies first
-app.use(cookieParser(config.sessionSecret));
-
-// Then set up CORS with credentials
 app.use(cors({
   origin: [
     config.frontendUrl || 'http://localhost:5173',
@@ -36,12 +27,10 @@ app.use(cors({
   optionsSuccessStatus: 200,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Cookie'],
-  exposedHeaders: ['set-cookie']
+  exposedHeaders: ['Set-Cookie', 'set-cookie'],
+  preflightContinue: true,
+  maxAge: 86400 // 24 hours
 }));
-
-// Session middleware (for SSO)
-app.use(sessionMiddleware);
-
 
 // Stripe webhook route must be registered BEFORE express.json()
 app.post('/api/v1/purchase/webhook', express.raw({ type: 'application/json' }), stripeWebhook);
@@ -49,6 +38,9 @@ app.post('/api/v1/purchase/webhook', express.raw({ type: 'application/json' }), 
 // Body parsers for all other routes
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Cookie parser
+app.use(cookieParser());
 
 app.use('/api/v1', routes);
 app.use('/api/settings', settingsRoutes);
