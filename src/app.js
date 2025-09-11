@@ -17,19 +17,30 @@ app.set('trust proxy', true);
 app.use(morgan('dev'));
 
 app.use(cors({
-  origin: [
-    config.frontendUrl || 'http://localhost:5173',
-    'http://localhost:5173',
-    'https://insuppent-dev.netlify.app',
-    'https://insuppent.onrender.com'
-  ],
+  origin: function(origin, callback) {
+    // Allow requests with no origin (like mobile apps, curl, postman)
+    if (!origin) return callback(null, true);
+    
+    // List of allowed origins
+    const allowedOrigins = [
+      'http://localhost:5173',
+      'https://insuppent-dev.netlify.app',
+      'https://insuppent.netlify.app',
+      'https://insuppent.onrender.com',
+      'https://insuplex360.com'
+    ];
+    
+    // Check if the origin is allowed
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
-  optionsSuccessStatus: 200,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Cookie', 'stripe-signature'],
-  exposedHeaders: ['Set-Cookie'],
-  preflightContinue: false,
-  maxAge: 86400 // 24 hours
+  exposedHeaders: ['Set-Cookie']
 }));
 
 // Stripe webhook route must be registered BEFORE express.json()
