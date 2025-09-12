@@ -30,6 +30,11 @@ export default {
     admin_expires_in: process.env.JWT_EXPIRES_IN || '7d',
   },
   sessionSecret: process.env.SESSION_SECRET || 'your-super-secret-session-key',
+  redis: {
+    host: process.env.REDIS_HOST || 'localhost',
+    port: process.env.REDIS_PORT || 6379,
+    password: process.env.REDIS_PASSWORD || null,
+  },
   stripeSecretKey: process.env.STRIPE_SECRET_KEY,
   stripeWebhookSecret: process.env.STRIPE_WEBHOOK_SECRET,
   frontendUrl: process.env.FRONTEND_URL,
@@ -46,5 +51,6 @@ export default {
   },
 
   wpBaseUrl: process.env.WP_BASE_URL || 'https://staging2.insuppent.com',
-  wpLoginUrl: process.env.WP_LOGIN_URL || 'https://staging2.insuppent.com/wp-login.php',
+  wpLoginUrl:
+    process.env.WP_LOGIN_URL || 'https://staging2.insuppent.com/wp-login.php',
 };

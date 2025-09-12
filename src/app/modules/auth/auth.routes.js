@@ -6,6 +6,8 @@ import {
     logout,
     refreshAuth,
     checkAuth,
+    getSessionInfo,
+    clearAllUserSessions,
 } from './auth.controller.js';
 import { requireAuth } from '../../middlewares/wpAuth.js';
 
@@ -25,5 +27,9 @@ router.post('/refresh', refreshAuth);
 
 // Logout
 router.post('/logout', logout);
+
+// Session management routes
+router.get('/session-info', getSessionInfo);
+router.post('/clear-all-sessions', requireAuth, clearAllUserSessions);
 
 export default router;

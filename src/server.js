@@ -1,6 +1,7 @@
 import config from './config/index.js';
 import app from './app.js';
 import { initializeDatabase } from './db/sequelize.js';
+import { connectRedis } from './db/redis.js';
 import { ensureLeadPricingFile } from './utils/ensureConfigFiles.js';
 
 // Handle uncaught exceptions
@@ -16,6 +17,9 @@ async function bootstrap() {
     // Connect to the MySQL database
     await initializeDatabase();
     console.log('🛢   MySQL database is connected successfully');
+
+    // Connect to Redis
+    await connectRedis();
 
     // Ensure configuration files exist
     await ensureLeadPricingFile();

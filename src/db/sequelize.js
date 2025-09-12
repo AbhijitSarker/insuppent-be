@@ -48,9 +48,9 @@ export async function initializeDatabase() {
   await sequelize.authenticate();
 
   // Sync models as needed
-  if (config.env !== 'production') {
-    await sequelize.sync({ alter: true });
-  }
+  // if (config.env !== 'production') {
+  //   await sequelize.sync({ alter: true });
+  // }
 
   initialized = true;
 }
