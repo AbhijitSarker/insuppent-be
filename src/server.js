@@ -22,7 +22,7 @@ async function bootstrap() {
     console.log('📄 Configuration files validated');
 
     // Start the server
-    server = app.listen(config.port, () => {
+    server = app.listen(config.port, '0.0.0.0', () => {
       console.log(`Application listening on port ${config.port}`);
     });
   } catch (err) {
