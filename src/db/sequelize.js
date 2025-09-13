@@ -36,21 +36,28 @@ let initialized = false;
 export async function initializeDatabase() {
   if (initialized) return;
 
-  // Create database if it doesn't exist (except in production)
-  if (config.env !== 'production') {
-    const connection = await mysql.createConnection({ host, port, user, password });
-    await connection.query(
-      `CREATE DATABASE IF NOT EXISTS \`${database}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;`
-    );
-    await connection.end();
+  try {
+    // Create database if it doesn't exist (except in production)
+    if (config.env !== 'production') {
+      const connection = await mysql.createConnection({ host, port, user, password });
+      await connection.query(
+        `CREATE DATABASE IF NOT EXISTS \`${database}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;`
+      );
+      await connection.end();
+    }
+
+    await sequelize.authenticate();
+
+    // // sync in development to ensure all tables are created
+    // if (config.env !== 'production') {
+    //   await sequelize.sync({ force: true });
+    // } else {
+    //   await sequelize.sync({ alter: true });
+    // }
+
+    initialized = true;
+  } catch (error) {
+    console.error('Database initialization failed:', error);
+    throw error;
   }
-
-  await sequelize.authenticate();
-
-  // Sync models as needed
-  // if (config.env !== 'production') {
-  //   await sequelize.sync({ alter: true });
-  // }
-
-  initialized = true;
 }
