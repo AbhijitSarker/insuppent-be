@@ -64,7 +64,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 // Session middleware
-app.use(sessionMiddleware);
+// app.use(sessionMiddleware);
 
 app.use('/api/v1', routes);
 app.use('/api/settings', settingsRoutes);
@@ -74,7 +74,7 @@ app.get('/', async (req, res) => {
   res.json({
     success: true,
     message: 'Server is running',
-    session: req.session?.id ? 'Session active' : 'No session',
+    // session: req.session?.id ? 'Session active' : 'No session',
     timestamp: new Date().toISOString()
   });
 });
