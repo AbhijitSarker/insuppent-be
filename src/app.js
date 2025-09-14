@@ -4,12 +4,8 @@ import httpStatus from 'http-status';
 import globalErrorHandler from './app/middlewares/globalErrorHandler.js';
 import routes from './app/routes/index.js';
 import { stripeWebhook } from './app/modules/purchase/leadPurchase.controller.js';
-import cookieParser from 'cookie-parser';
 import morgan from 'morgan';
-
-import config from './config/index.js';
 import settingsRoutes from './app/modules/settings/settings.routes.js';
-import sessionMiddleware from './app/middlewares/session.js';
 
 const app = express();
 app.set('trust proxy', true);
@@ -60,11 +56,6 @@ app.post('/api/v1/purchase/webhook', express.raw({ type: 'application/json' }), 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Cookie parser
-app.use(cookieParser());
-
-// Session middleware
-// app.use(sessionMiddleware);
 
 app.use('/api/v1', routes);
 app.use('/api/settings', settingsRoutes);
@@ -74,7 +65,6 @@ app.get('/', async (req, res) => {
   res.json({
     success: true,
     message: 'Server is running',
-    // session: req.session?.id ? 'Session active' : 'No session',
     timestamp: new Date().toISOString()
   });
 });

@@ -6,8 +6,6 @@ import { AdminRoutes } from '../modules/admin/admin.routes.js';
 import { AdminAuthRoutes } from '../modules/admin/auth/admin.auth.routes.js';
 import { UserRoutes } from '../modules/user/user.routes.js';
 import { adminAuth } from '../middlewares/adminAuth.js';
-
-import AuthRoutes from '../modules/auth/auth.routes.js';
 import { SettingsRoutes } from '../modules/settings/settings.routes.js';
 
 const router = express.Router();
@@ -33,10 +31,6 @@ const moduleRoutes = [
   {
     path: '/users',
     route: UserRoutes,
-  },
-  {
-    path: '/auth',
-    route: AuthRoutes,
   },
   {
     path: '/settings',

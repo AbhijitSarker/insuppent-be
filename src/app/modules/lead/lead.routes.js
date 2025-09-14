@@ -2,7 +2,6 @@ import express from 'express';
 import { LeadController } from './lead.controller.js';
 import validateRequest from '../../middlewares/validateRequest.js';
 import { LeadValidation } from './lead.validations.js';
-import { requireAuth, requireRole } from '../../middlewares/wpAuth.js';
 import { adminAuth } from '../../middlewares/adminAuth.js';
 
 
@@ -23,8 +22,6 @@ router.patch(
   '/:id/status',
   LeadController.updateStatus,
 );
-
-router.use(requireAuth);
 
 router.get('/find', LeadController.findLeads);
 
