@@ -63,10 +63,8 @@ export const getLeadPricing = async (req, res) => {
 export const updateLeadPricing = async (req, res) => {
   try {
     const { pricing } = req.body;
-    console.log('Received pricing update request:', pricing);
     
     if (!pricing || typeof pricing !== 'object' || Object.keys(pricing).length === 0) {
-      console.log('Error: Pricing data is missing or invalid');
       return res.status(400).json({
         success: false,
         message: 'Valid pricing data is required'
@@ -74,7 +72,6 @@ export const updateLeadPricing = async (req, res) => {
     }
 
     const updatedPricing = await setLeadPricingService(pricing);
-    console.log('Lead pricing updated successfully');
     
     res.status(200).json({
       success: true,

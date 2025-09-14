@@ -23,7 +23,6 @@ export const generatePersonalizedEmails = async (lead) => {
     // Remove markdown code block if present
     const cleanText = text.replace(/^```json[\s\S]*?\n|```$/g, '').trim();
     const emails = JSON.parse(cleanText);
-    console.log('Parsed Emails:', emails);
     if (Array.isArray(emails) && emails.length === 3 && emails.every(e => e.subject && e.body && e.tone)) {
       return emails;
     }

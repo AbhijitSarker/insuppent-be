@@ -6,8 +6,6 @@ import userAuth from '../../middlewares/userAuth.js';
 
 const router = express.Router();
 
-// Stripe webhook route is handled in app.js before body parser
-
 // Admin routes
 router.get('/user/:userId/leads', adminAuth, getUserPurchasedLeadsController);
 

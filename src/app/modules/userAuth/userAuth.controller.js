@@ -6,6 +6,7 @@ import httpStatus from 'http-status';
 import config from '../../../config/index.js';
 import ApiError from '../../../errors/ApiError.js';
 import { UserService } from '../user/user.service.js';
+import { User } from '../user/user.model.js';
 
 // Verify WordPress token and authenticate user
 const verifyWpUser = catchAsync(async (req, res) => {
@@ -47,7 +48,6 @@ const verifyWpUser = catchAsync(async (req, res) => {
             };
             user = await UserService.createUser(userData);
         }
-
         // Update user info if it exists (in case of changes in WordPress)
         if (user.name !== wpUser.name || user.email !== wpUser.email) {
             user.name = wpUser.name;

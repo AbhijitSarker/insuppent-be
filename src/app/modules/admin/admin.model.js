@@ -5,20 +5,15 @@ import config from '../../../config/index.js';
 
 export class Admin extends Model {
   async isPasswordMatched(givenPassword) {
-    console.log('Comparing passwords...');
-    console.log('Given password:', givenPassword);
-    console.log('Stored hash:', this.password);
+
     try {
       // Manual hash for comparison
       const saltRounds = 12;
       const manualHash = await bcrypt.hash(givenPassword, saltRounds);
-      console.log('Manual hash of given password:', manualHash);
       
       const result = await bcrypt.compare(givenPassword, this.password);
-      console.log('Password comparison result:', result);
       return result;
     } catch (error) {
-      console.error('Error comparing passwords:', error);
       return false;
     }
   }

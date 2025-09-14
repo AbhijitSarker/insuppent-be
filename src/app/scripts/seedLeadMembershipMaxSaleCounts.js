@@ -9,7 +9,6 @@ export const seedLeadMembershipMaxSaleCounts = async () => {
   for (const m of memberships) {
     await LeadMembershipMaxSaleCount.findOrCreate({ where: { membership: m.membership }, defaults: { maxLeadSaleCount: m.maxLeadSaleCount } });
   }
-  console.log('Seeded LeadMembershipMaxSaleCount');
 };
 
 // To use: import and call seedLeadMembershipMaxSaleCounts() in your DB seed script or migration.

@@ -10,11 +10,9 @@ import { LeadService } from '../lead/lead.service.js';
 import { sendLeadInfoMail, sendAdminPurchaseNotification } from '../../../utils/mailSender.js';
 
 export const createCheckoutSession = async (req, res, next) => {
-  console.log('createCheckoutSession called', req.user);
   try {
     const { leadIds } = req.body;
 
-    // const userId = req.user.id;
     if (!Array.isArray(leadIds) || leadIds.length === 0) return next(new ApiError(400, 'No leads selected'));
     
     const leads = await getLeadsForPurchase(leadIds, req.user.id);
@@ -27,8 +25,6 @@ export const createCheckoutSession = async (req, res, next) => {
       mode: 'payment',
       customer_email: req.user.email,
       metadata: {
-        // userId,
-        //todo fix this
         userId: req.user.id,
         leadIds: leadIds.join(','),
       },
@@ -44,7 +40,6 @@ export const createCheckoutSession = async (req, res, next) => {
 
 
 export const stripeWebhook = async (req, res, next) => {
-  console.log('stripeWebhook called');
   let event;
   try {
     const sig = req.headers['stripe-signature'];
@@ -81,11 +76,10 @@ export const stripeWebhook = async (req, res, next) => {
         for (const leadId of leadIds) {
           // Always fetch lead from DB to ensure latest info
           const lead = await LeadService.getSingleLead(leadId);
-          console.log('Fetched lead for email:', lead, lead ? 'found' : 'not found');
           if (lead) {
             purchasedLeads.push(lead.toJSON());
             try {
-              const mailResult = await sendLeadInfoMail('abhijitsarker03@gmail.com', lead.toJSON());
+              const mailResult = await sendLeadInfoMail(user.email, lead.toJSON());
             } catch (mailErr) {
               console.error('Error sending mail for lead', leadId, mailErr);
             }
@@ -109,7 +103,6 @@ export const stripeWebhook = async (req, res, next) => {
           };
           
           const adminMailResult = await sendAdminPurchaseNotification(purchaseData);
-          console.log('Admin notification mail sent result:', adminMailResult && adminMailResult.accepted);
         } catch (adminMailErr) {
           console.error('Error sending admin notification email:', adminMailErr);
         }
@@ -146,7 +139,6 @@ export const getPurchaseHistory = async (req, res, next) => {
 
 // GET /leads/my
 export const getMyLeadsController = async (req, res, next) => {
-  console.log('getMyLeadsController called for user:', req.user);
   try {
     const leads = await getMyLeads(req.user.id);
     res.json({ data: leads });

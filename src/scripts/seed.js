@@ -15,7 +15,6 @@ async function runSeed() {
         role: 'admin',
         status: 'active',
       });
-      console.log('Seeded default admin: branton@gmail.com / secret123');
     }
 
 

@@ -34,7 +34,6 @@ export const registerAdmin = async (payload) => {
 };
 
 export const loginAdmin = async (email, password) => {
-  console.log('Login attempt for email:', email);
   
   // Find admin by email with password
   const admin = await Admin.findOne({
@@ -43,18 +42,15 @@ export const loginAdmin = async (email, password) => {
   });
 
   if (!admin) {
-    console.log('No admin found with email:', email);
     throw new ApiError(httpStatus.UNAUTHORIZED, 'Invalid credentials');
   }
 
   if (admin.status !== 'active') {
-    console.log('Admin account is not active:', email);
     throw new ApiError(httpStatus.UNAUTHORIZED, 'Invalid credentials');
   }
 
   // Check password
   const isPasswordValid = await admin.isPasswordMatched(password);
-  console.log('Password validation result:', isPasswordValid);
   
   if (!isPasswordValid) {
     throw new ApiError(httpStatus.UNAUTHORIZED, 'Invalid credentials');

@@ -26,7 +26,6 @@ const seedLeadMembershipMaxSaleCounts = async () => {
           maxLeadSaleCount: 100
       });
 
-      console.log('memberships created successfully');
     process.exit(0);
   } catch (error) {
     console.error('Error creating admin user:', error);
