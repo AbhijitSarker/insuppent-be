@@ -21,6 +21,11 @@ export default {
     refresh_expires_in: process.env.JWT_REFRESH_EXPIRES_IN || '7d',
     admin_secret: process.env.JWT_SECRET || 'your-secret-key',
     admin_expires_in: process.env.JWT_EXPIRES_IN || '7d',
+    user_secret: process.env.JWT_USER_SECRET || process.env.JWT_SECRET,
+    user_expires_in: process.env.JWT_USER_EXPIRES_IN || '7d',
+  },
+  wordpress: {
+    site_url: process.env.WORDPRESS_SITE_URL, 
   },
   stripeSecretKey: process.env.STRIPE_SECRET_KEY,
   stripeWebhookSecret: process.env.STRIPE_WEBHOOK_SECRET,

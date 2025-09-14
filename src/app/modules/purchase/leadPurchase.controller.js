@@ -146,6 +146,7 @@ export const getPurchaseHistory = async (req, res, next) => {
 
 // GET /leads/my
 export const getMyLeadsController = async (req, res, next) => {
+  console.log('getMyLeadsController called for user:', req.user);
   try {
     const leads = await getMyLeads(req.user.id);
     res.json({ data: leads });

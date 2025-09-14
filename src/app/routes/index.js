@@ -7,7 +7,7 @@ import { AdminAuthRoutes } from '../modules/admin/auth/admin.auth.routes.js';
 import { UserRoutes } from '../modules/user/user.routes.js';
 import { adminAuth } from '../middlewares/adminAuth.js';
 import { SettingsRoutes } from '../modules/settings/settings.routes.js';
-
+import userAuthRoutes from '../modules/userAuth/userAuth.routes.js';
 const router = express.Router();
 
 const moduleRoutes = [
@@ -35,7 +35,12 @@ const moduleRoutes = [
   {
     path: '/settings',
     route: SettingsRoutes,
-  }
+  },
+  {
+    path: '/user/auth',
+    route: userAuthRoutes,
+  },
+
 ];
 
 moduleRoutes.forEach(route => {

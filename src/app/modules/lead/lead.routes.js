@@ -3,6 +3,7 @@ import { LeadController } from './lead.controller.js';
 import validateRequest from '../../middlewares/validateRequest.js';
 import { LeadValidation } from './lead.validations.js';
 import { adminAuth } from '../../middlewares/adminAuth.js';
+import userAuth from '../../middlewares/userAuth.js';
 
 
 const router = express.Router();
@@ -23,7 +24,7 @@ router.patch(
   LeadController.updateStatus,
 );
 
-router.get('/find', LeadController.findLeads);
+router.get('/find', userAuth, LeadController.findLeads);
 
 router.get(
   '/:id',

@@ -13,37 +13,46 @@ app.set('trust proxy', true);
 // HTTP request logger
 app.use(morgan('dev'));
 
-// CORS configuration
 const corsOptions = {
-  origin: function(origin, callback) {
-    const allowedOrigins = [
-      'http://localhost:5173',
-      'https://insuppent-dev.netlify.app',
-      'https://insuppent.netlify.app',
-      'https://insuppent.onrender.com',
-      'https://insuplex360.com'
-    ];
-    
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: [
-    'Content-Type',
-    'Authorization',
-    'X-Requested-With',
-    'Cookie',
-    'stripe-signature',
-    'Accept',
-    'Origin'
-  ],
-  exposedHeaders: ['Set-Cookie'],
-  maxAge: 86400
-};
+    origin: function (origin, callback) {
+      const allowedOrigins = [
+        'http://localhost:5173',
+        'http://localhost:3000',
+        'https://insuppent-dev.netlify.app',
+        'https://insuppent.netlify.app',
+        'https://insuppent.onrender.com',
+        'https://insuplex360.com',
+        'https://your-wordpress-site.com', // Add your WordPress site
+        process.env.FRONTEND_URL, // Add environment variable for frontend URL
+      ].filter(Boolean); // Remove any undefined values
+
+      // Allow requests with no origin (mobile apps, Postman, etc.)
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        console.warn(`CORS blocked origin: ${origin}`);
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: [
+      'Content-Type',
+      'Authorization',
+      'X-Requested-With',
+      'Cookie',
+      'stripe-signature',
+      'Accept',
+      'Origin',
+      'Cache-Control',
+      'Pragma'
+    ],
+    exposedHeaders: ['Set-Cookie', 'Authorization'],
+    maxAge: 86400, // 24 hours
+    optionsSuccessStatus: 200 // For legacy browsers
+  };
 
 // Enable pre-flight for all routes
 app.options('*', cors(corsOptions));
@@ -68,10 +77,6 @@ app.get('/', async (req, res) => {
     timestamp: new Date().toISOString()
   });
 });
-// //Testing
-// app.get('/', async (req, res) => {
-//   res.send('Hello World');
-// });
 
 //global error handler
 app.use(globalErrorHandler);
