@@ -29,9 +29,6 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
 }));
 
-// Enable pre-flight for all routes
-app.options('*', cors(corsOptions));
-app.use(cors(corsOptions));
 
 // Stripe webhook route must be registered BEFORE express.json()
 app.post('/api/v1/purchase/webhook', express.raw({ type: 'application/json' }), stripeWebhook);
