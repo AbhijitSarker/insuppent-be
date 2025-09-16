@@ -40,7 +40,10 @@ app.use(cookieParser());
 app.post('/api/v1/purchase/webhook', express.raw({ type: 'application/json' }), stripeWebhook);
 
 // Lead webhook route for form submissions (accepts application/x-www-form-urlencoded)
-app.post('/api/v1/leads/webhook', express.urlencoded({ extended: true }), LeadController.webhookHandler);
+app.post('/api/v1/leads/webhook', express.urlencoded({ extended: true }), (req, res, next) => {
+  console.log('Webhook body type:', typeof req.body, 'body:', req.body);
+  return LeadController.webhookHandler(req, res, next);
+});
 
 // Body parsers for all other routes
 app.use(express.json());
