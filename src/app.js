@@ -2,12 +2,14 @@ import cors from 'cors';
 import express from 'express';
 import httpStatus from 'http-status';
 import globalErrorHandler from './app/middlewares/globalErrorHandler.js';
+
 import routes from './app/routes/index.js';
 import { stripeWebhook } from './app/modules/purchase/leadPurchase.controller.js';
 import morgan from 'morgan';
 import settingsRoutes from './app/modules/settings/settings.routes.js';
 import config from './config/index.js';
 import cookieParser from 'cookie-parser';
+import { LeadController } from './app/modules/lead/lead.controller.js';
 
 const app = express();
 app.set('trust proxy', true);
@@ -30,10 +32,15 @@ app.use(cors({
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
 }));
+
 app.use(cookieParser());
+
 
 // Stripe webhook route must be registered BEFORE express.json()
 app.post('/api/v1/purchase/webhook', express.raw({ type: 'application/json' }), stripeWebhook);
+
+// Lead webhook route for form submissions (accepts application/x-www-form-urlencoded)
+app.post('/api/v1/leads/webhook', express.urlencoded({ extended: true }), LeadController.webhookHandler);
 
 // Body parsers for all other routes
 app.use(express.json());
