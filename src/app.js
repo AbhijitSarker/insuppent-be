@@ -19,6 +19,7 @@ app.use(morgan('dev'));
 app.use(cors({
   origin: [
     config.frontendUrl || 'https://insuplex360.com',
+    'https://insuppent.com',
     'https://insuplex360.com',
     'http://localhost:5173',
     'https://insuppent-dev.netlify.app',
