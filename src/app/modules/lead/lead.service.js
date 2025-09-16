@@ -12,7 +12,7 @@ import { calculateLeadPrice } from '../../../utils/leadPricing.js';
 
 const processWebhookData = async payload => {
   const body = parsePayload(payload);
-
+  console.log('Parsed webhook body:', body);
   const leadData = {
     zipCode: body['Zip Code']?.trim(),
     state: body['State']?.trim(),
@@ -28,7 +28,7 @@ const processWebhookData = async payload => {
       return 'other';
     })(),
   };
-
+  console.log('Initial lead data:', leadData);
   // Generate emails using OpenAI
   let emails = [];
   try {
@@ -38,6 +38,7 @@ const processWebhookData = async payload => {
     // Optionally log error
   }
   leadData.emails = emails;
+  console.log('Final lead data to be saved:', leadData);
   return await Lead.create(leadData);
 };
 

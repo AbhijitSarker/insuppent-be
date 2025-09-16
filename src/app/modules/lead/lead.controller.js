@@ -6,6 +6,7 @@ import { LeadService } from './lead.service.js';
 import { LEAD_MESSAGES } from '../../../enums/messages.js';
 
 const webhookHandler = catchAsync(async (req, res) => {
+  console.log('Received webhook:', req.body);
   const payload = req.body;
 
   await LeadService.processWebhookData(payload);
