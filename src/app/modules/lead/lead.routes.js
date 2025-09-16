@@ -8,7 +8,11 @@ import userAuth from '../../middlewares/userAuth.js';
 
 const router = express.Router();
 
-router.post('/webhook', LeadController.webhookHandler);
+router.post(
+  '/webhook', 
+  express.urlencoded({ extended: true }),
+ LeadController.webhookHandler
+);
 // Protected routes
 router.get('/',
   adminAuth,
