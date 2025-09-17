@@ -34,7 +34,7 @@ export const sendLeadInfoMail = async (to, leadData) => {
 
 // Helper to send admin purchase notification
 export const sendAdminPurchaseNotification = async (purchaseData) => {
-  const adminEmail = process.env.ADMIN_EMAIL || 'abhijitsarker03@gmail.com';
+  const adminEmail = process.env.ADMIN_EMAIL;
   
   return sendMail({
     to: adminEmail,
