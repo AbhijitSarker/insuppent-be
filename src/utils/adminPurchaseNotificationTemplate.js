@@ -21,7 +21,6 @@ const adminPurchaseNotificationTemplate = data => {
         body {
           font-family: Arial, sans-serif;
           line-height: 1.6;
-          color: #333;
           background: #f5f5f5;
           -webkit-text-size-adjust: 100%;
           -ms-text-size-adjust: 100%;
@@ -40,16 +39,11 @@ const adminPurchaseNotificationTemplate = data => {
         }
         .header {
           background-color: #000;
-          color: #fff;
           padding: 20px;
           text-align: center;
         }
         .content {
           text-align: center;
-        }
-        .content p {
-          margin: 0 0 15px;
-          color: #333;
         }
         .payment-details {
           background-color: #fff;
@@ -59,7 +53,6 @@ const adminPurchaseNotificationTemplate = data => {
           text-align: left;
         }
         .payment-details h3 {
-          color: #6f4e37;
           margin-top: 0;
         }
         .payment-details p {
@@ -69,7 +62,6 @@ const adminPurchaseNotificationTemplate = data => {
           display: inline-block;
           padding: 10px 20px;
           background-color: #6f4e37;
-          color: #fff;
           text-decoration: none;
           border-radius: 5px;
           font-weight: bold;
@@ -78,12 +70,10 @@ const adminPurchaseNotificationTemplate = data => {
           text-align: center;
           padding: 20px;
           font-size: 12px;
-          color: #6f4e37;
           background: none;
         }
         .footer a {
           margin: 0 5px;
-          color: #6f4e37;
           text-decoration: none;
         }
       </style>
@@ -94,30 +84,30 @@ const adminPurchaseNotificationTemplate = data => {
           <td align="center" style="padding:0;">
             <div class="container" style="min-height:0;">
               <div class="logo-area">
-               <img src="https://i.ibb.co.com/dJzZpxz9/Insuplex360.png" alt="Insuplex360" style="max-width:200px;width:100%;height:auto;display:inline-block;"  border="0" />
+               <img src="https://i.ibb.co.com/dJzZpxz9/Insuplex360.png" alt="Insuplex360" style="max-width:200px;width:100%;height:auto;display:inline-block;" border="0" />
               </div>
               <div class="header">
-                <h2>Payment Received</h2>
+                <h2 style="color: #000 !important; margin:0;">Payment Received</h2>
               </div>
               <div class="content">
                 <div class="payment-details">
-                  <p>A new payment has been received successfully.</p>
-                  <h3>Payment details</h3>
-                  <p><strong>User:</strong> ${user.name || 'N/A'} (${user.email || 'N/A'})</p>
+                  <p style="color: #000 !important;">A new payment has been received successfully.</p>
+                  <h3 style="color: #000 !important;">Payment details</h3>
+                  <p style="color: #000 !important;"><strong>User:</strong> ${user.name || 'N/A'} (${user.email || 'N/A'})</p>
                   ${leads.length === 1
-      ? `<p><strong>Lead ID:</strong> ${lead.id}</p>`
-      : `<p><strong>Lead IDs:</strong> ${leads.map(l => l.id).join(', ')}</p>`
+      ? `<p style="color: #000 !important;"><strong>Lead ID:</strong> ${lead.id}</p>`
+      : `<p style="color: #000 !important;"><strong>Lead IDs:</strong> ${leads.map(l => l.id).join(', ')}</p>`
     }
-                  <p><strong>Amount:</strong> $${totalAmount.toFixed(2)}</p>
-                  <p><strong>Date:</strong> ${purchaseDate}</p>
-                  ${leads.length > 1 ? `<p><em>Note: This payment includes ${leads.length} leads.</em></p>` : ''}
-                  <p>Thank you,</p>
-                  <p>The Insuplex Team</p>
+                  <p style="color: #000 !important;"><strong>Amount:</strong> $${totalAmount.toFixed(2)}</p>
+                  <p style="color: #000 !important;"><strong>Date:</strong> ${purchaseDate}</p>
+                  ${leads.length > 1 ? `<p style="color: #000 !important;"><em>Note: This payment includes ${leads.length} leads.</em></p>` : ''}
+                  <p style="color: #000 !important;">Thank you,</p>
+                  <p style="color: #000 !important;">The Insuplex Team</p>
                 </div>
               </div>
             </div>
             <div class="footer">
-                <p style="margin-top: 10px;">This is an automated notification from the Insuppent platform. Please do not reply to this email.</p>
+                <p style="color: #000 !important; margin-top: 10px;">This is an automated notification from the Insuppent platform. Please do not reply to this email.</p>
                 <table align="center" style="margin: 20px auto 0 auto; border-spacing: 10px 0;">
                   <tr>
                     <td>
