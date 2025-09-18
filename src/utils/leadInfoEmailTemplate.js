@@ -86,7 +86,7 @@ const emailTemplate = leadData => {
                <img src="https://i.ibb.co.com/dJzZpxz9/Insuplex360.png" alt="Insuplex360" style="max-width:200px;width:100%;height:auto;display:inline-block;" border="0" />
               </div>
               <div class="header">
-                <h1 style="color: #000 !important; margin:0;">Purchase Confirmation</h1>
+                <h1 style="color: #fff !important; margin:0;">Purchase Confirmation</h1>
               </div>
               <div class="content">
                 <p style="color: #000 !important;">Dear Customer,</p>
